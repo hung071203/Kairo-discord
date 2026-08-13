@@ -1,5 +1,7 @@
 allowBuilds:
+  '@prisma/engines': true
   esbuild: true
   necord: false
+  prisma: true
 patchedDependencies:
   '@necord/localization': patches/@necord__localization.patch

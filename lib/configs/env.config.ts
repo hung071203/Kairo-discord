@@ -12,7 +12,8 @@ const envSchema = z.object({
 	DISCORD_DEV_GUILD_IDS: z
 		.string()
 		.optional()
-		.transform((value) => value?.split(',').map((id) => id.trim()).filter(Boolean))
+		.transform((value) => value?.split(',').map((id) => id.trim()).filter(Boolean)),
+	DATABASE_URL: z.string().min(1, 'DATABASE_URL không được để trống')
 });
 
 function validateEnv(config: Record<string, unknown>) {

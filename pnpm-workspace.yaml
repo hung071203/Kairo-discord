@@ -1,0 +1,5 @@
+allowBuilds:
+  esbuild: true
+  necord: false
+patchedDependencies:
+  '@necord/localization': patches/@necord__localization.patch

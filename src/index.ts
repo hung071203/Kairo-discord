@@ -1,4 +1,4 @@
 import { startBot } from "./bot/index.js";
 
 startBot();
-const x = 1;
+console.log(someUndefinedVariable);

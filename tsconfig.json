@@ -14,10 +14,9 @@
     "resolveJsonModule": true,
     "declaration": false,
     "sourceMap": true,
-    "baseUrl": ".",
     "paths": {
-      "@src/*": ["src/*"],
-      "@lib/*": ["lib/*"]
+      "@src/*": ["./src/*"],
+      "@lib/*": ["./lib/*"]
     }
   },
   "include": ["src", "lib"]

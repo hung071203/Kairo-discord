@@ -21,6 +21,30 @@ export default {
 				roles: 'Vai trò',
 				noRoles: 'Không có vai trò nào'
 			}
+		},
+		serverinfo: {
+			name: 'serverinfo',
+			description: 'Xem thông tin của server',
+			fields: {
+				name: 'Tên',
+				id: 'ID',
+				owner: 'Chủ server',
+				createdAt: 'Ngày tạo',
+				members: 'Thành viên',
+				roles: 'Vai trò',
+				channels: 'Kênh'
+			}
+		},
+		avatar: {
+			name: 'avatar',
+			description: 'Xem avatar của một user',
+			options: {
+				user: {
+					name: 'user',
+					description: 'User cần xem avatar'
+				}
+			},
+			title: 'Avatar của {{username}}'
 		}
 	},
 	errors: {

@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { TranslationFn } from "@necord/localization";
-import { EmbedBuilder, GuildMember } from "discord.js";
+import { EmbedBuilder, Guild, GuildMember, User } from "discord.js";
 import { TranslationKey } from "@lib/common/translationKey.common";
 import { DateUtil } from "@lib/utils/date.util";
 
@@ -51,5 +51,34 @@ export class UtilityService {
     }
 
     return embed;
+  }
+
+  public buildServerInfoEmbed(guild: Guild, t: TranslationFn): EmbedBuilder {
+    return new EmbedBuilder()
+      .setColor(null)
+      .setThumbnail(guild.iconURL({ size: 1024 }))
+      .setImage(guild.bannerURL({ size: 1024 }))
+      .addFields(
+        { name: t(TranslationKey.ServerInfoName), value: guild.name, inline: true },
+        { name: t(TranslationKey.ServerInfoId), value: guild.id, inline: true },
+        { name: t(TranslationKey.ServerInfoOwner), value: `<@${guild.ownerId}>`, inline: true },
+        {
+          name: t(TranslationKey.ServerInfoCreatedAt),
+          value: DateUtil.toDiscordTimestamp(guild.createdTimestamp, "F"),
+          inline: true,
+        },
+        { name: t(TranslationKey.ServerInfoMembers), value: String(guild.memberCount), inline: true },
+        { name: t(TranslationKey.ServerInfoRoles), value: String(guild.roles.cache.size), inline: true },
+        { name: t(TranslationKey.ServerInfoChannels), value: String(guild.channels.cache.size), inline: true },
+      );
+  }
+
+  public buildAvatarEmbed(user: User, member: GuildMember | null, t: TranslationFn): EmbedBuilder {
+    const avatarUrl = (member ?? user).displayAvatarURL({ size: 1024 });
+
+    return new EmbedBuilder()
+      .setColor(member?.displayColor || null)
+      .setTitle(t(TranslationKey.AvatarTitle, { username: user.username }))
+      .setImage(avatarUrl);
   }
 }

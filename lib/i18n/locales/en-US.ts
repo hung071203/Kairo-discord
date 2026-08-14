@@ -21,6 +21,30 @@ export default {
 				roles: 'Roles',
 				noRoles: 'No roles'
 			}
+		},
+		serverinfo: {
+			name: 'serverinfo',
+			description: 'Show information about the server',
+			fields: {
+				name: 'Name',
+				id: 'ID',
+				owner: 'Owner',
+				createdAt: 'Created at',
+				members: 'Members',
+				roles: 'Roles',
+				channels: 'Channels'
+			}
+		},
+		avatar: {
+			name: 'avatar',
+			description: "Show a user's avatar",
+			options: {
+				user: {
+					name: 'user',
+					description: 'The user to look up'
+				}
+			},
+			title: "{{username}}'s avatar"
 		}
 	},
 	errors: {

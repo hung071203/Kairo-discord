@@ -3,7 +3,7 @@
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
-		"dev": "tsx watch src/main.ts",
+		"dev": "tsc-watch --preserveWatchOutput --onSuccess \"node scripts/dev-run.js\"",
 		"build": "tsc && tsc-alias",
 		"start": "node dist/src/main.js",
 		"db:generate": "prisma generate",
@@ -14,7 +14,9 @@
 		"@necord/localization": "^4.0.2",
 		"@nestjs/common": "^11.1.29",
 		"@nestjs/core": "^11.1.29",
+		"@prisma/adapter-mariadb": "^7.9.1",
 		"@prisma/client": "^7.9.1",
+		"dayjs": "^1.11.21",
 		"discord-api-types": "^0.38.53",
 		"discord.js": "^14.27.0",
 		"necord": "^6.14.0",
@@ -26,7 +28,7 @@
 		"@types/node": "^26.2.0",
 		"prisma": "^7.9.1",
 		"tsc-alias": "^1.9.1",
-		"tsx": "^4.23.12",
+		"tsc-watch": "^7.2.1",
 		"typescript": "^7.0.2"
 	}
 }

@@ -4,6 +4,23 @@ export default {
 			name: 'ping',
 			description: 'Phản hồi Pong!',
 			reply: 'Pong! Độ trễ: {{latency}}ms'
+		},
+		userinfo: {
+			name: 'userinfo',
+			description: 'Xem thông tin của một thành viên',
+			options: {
+				member: {
+					name: 'member',
+					description: 'Thành viên cần xem thông tin'
+				}
+			},
+			fields: {
+				nickname: 'Biệt danh',
+				joinedAt: 'Tham gia server',
+				createdAt: 'Tạo tài khoản',
+				roles: 'Vai trò',
+				noRoles: 'Không có vai trò nào'
+			}
 		}
 	},
 	errors: {

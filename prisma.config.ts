@@ -3,7 +3,7 @@ import { defineConfig, env } from 'prisma/config';
 try {
 	process.loadEnvFile();
 } catch {
-	// Không có file .env, bỏ qua (dùng biến môi trường có sẵn).
+	// No .env file present, ignore (use environment variables already set).
 }
 
 export default defineConfig({

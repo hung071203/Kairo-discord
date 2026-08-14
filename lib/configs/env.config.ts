@@ -3,17 +3,17 @@ import { z } from 'zod';
 try {
 	process.loadEnvFile();
 } catch {
-	// Không có file .env (ví dụ khi deploy bằng biến môi trường có sẵn), bỏ qua.
+	// No .env file present (e.g. deploying with environment variables already set), ignore.
 }
 
 const envSchema = z.object({
 	NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-	DISCORD_TOKEN: z.string().min(1, 'DISCORD_TOKEN không được để trống'),
+	DISCORD_TOKEN: z.string().min(1, 'DISCORD_TOKEN is required'),
 	DISCORD_DEV_GUILD_IDS: z
 		.string()
 		.optional()
 		.transform((value) => value?.split(',').map((id) => id.trim()).filter(Boolean)),
-	DATABASE_URL: z.string().min(1, 'DATABASE_URL không được để trống')
+	DATABASE_URL: z.string().min(1, 'DATABASE_URL is required')
 });
 
 function validateEnv(config: Record<string, unknown>) {
@@ -21,7 +21,7 @@ function validateEnv(config: Record<string, unknown>) {
 
 	if (!result.success) {
 		const details = result.error.issues.map((issue) => `- ${issue.path.join('.')}: ${issue.message}`).join('\n');
-		throw new Error(`Biến môi trường không hợp lệ:\n${details}`);
+		throw new Error(`Invalid environment variables:\n${details}`);
 	}
 
 	return result.data;

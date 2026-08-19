@@ -36,6 +36,7 @@ export class AutomodService {
       triggerType: AutoModerationRuleTriggerType.Keyword,
       triggerMetadata: { keywordFilter: params.keywords },
       actions: this.buildMessageActions(params),
+      enabled: true,
     });
   }
 
@@ -54,6 +55,7 @@ export class AutomodService {
       triggerType: AutoModerationRuleTriggerType.KeywordPreset,
       triggerMetadata: { presets },
       actions: this.buildMessageActions(params),
+      enabled: true,
     });
   }
 
@@ -70,6 +72,7 @@ export class AutomodService {
         mentionRaidProtectionEnabled: params.raidProtection,
       },
       actions: this.buildMessageActions(params),
+      enabled: true,
     });
   }
 
@@ -82,6 +85,7 @@ export class AutomodService {
       eventType: AutoModerationRuleEventType.MessageSend,
       triggerType: AutoModerationRuleTriggerType.Spam,
       actions: this.buildMessageActions(params),
+      enabled: true,
     });
   }
 
@@ -95,6 +99,7 @@ export class AutomodService {
       triggerType: AutoModerationRuleTriggerType.MemberProfile,
       triggerMetadata: { keywordFilter: params.keywords },
       actions: this.buildProfileActions(params),
+      enabled: true,
     });
   }
 

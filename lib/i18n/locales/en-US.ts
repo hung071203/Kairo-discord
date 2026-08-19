@@ -198,7 +198,23 @@ export default {
 		},
 		warn: {
 			name: 'warn',
-			description: 'Warn a member',
+			description: 'Manage member warnings',
+			add: {
+				name: 'add',
+				description: 'Warn a member'
+			},
+			list: {
+				name: 'list',
+				description: "Show a member's warning history"
+			},
+			listAll: {
+				name: 'list-all',
+				description: 'Show the warning history of every member in this server'
+			},
+			remove: {
+				name: 'remove',
+				description: 'Remove one or more warnings from a member'
+			},
 			options: {
 				member: {
 					name: 'member',
@@ -212,8 +228,6 @@ export default {
 			reply: '⚠️ Warned {{target}}. Reason: {{reason}}'
 		},
 		warnings: {
-			name: 'warnings',
-			description: "Show a member's warning history",
 			options: {
 				member: {
 					name: 'member',
@@ -226,8 +240,6 @@ export default {
 			entryValue: 'By {{moderator}} — {{reason}}'
 		},
 		warningsAll: {
-			name: 'warnings-all',
-			description: 'Show the warning history of every member in this server',
 			title: 'Warnings overview',
 			empty: 'No member has any warnings.',
 			entry: '**{{index}}.** {{target}} — {{count}} warning(s)',
@@ -235,8 +247,6 @@ export default {
 			selectOptionDescription: '{{count}} warning(s)'
 		},
 		warnRemove: {
-			name: 'warn-remove',
-			description: 'Remove one or more warnings from a member',
 			options: {
 				member: {
 					name: 'member',
@@ -248,6 +258,110 @@ export default {
 			entry: '#{{index}} · {{date}} — {{reason}}',
 			selectPlaceholder: 'Select one or more warnings to remove',
 			reply: '🗑️ Removed {{count}} warning(s).'
+		},
+		automodRule: {
+			name: 'automod-rule',
+			description: 'Manage AutoMod rules for this server',
+			options: {
+				name: {
+					name: 'name',
+					description: 'A name for this rule'
+				},
+				alertChannel: {
+					name: 'alert_channel',
+					description: 'Channel to send alert logs to when this rule triggers (optional)'
+				},
+				timeoutMinutes: {
+					name: 'timeout_minutes',
+					description: 'Timeout the member for this many minutes when triggered (optional)'
+				}
+			},
+			create: {
+				name: 'create',
+				description: 'Create a new AutoMod rule',
+				keyword: {
+					name: 'keyword',
+					description: 'Block messages containing specific keywords',
+					options: {
+						keywords: {
+							name: 'keywords',
+							description: 'Comma-separated keywords to block'
+						}
+					}
+				},
+				preset: {
+					name: 'preset',
+					description: "Block messages using Discord's built-in word lists",
+					options: {
+						profanity: {
+							name: 'profanity',
+							description: 'Block profanity/cursing (default: on)'
+						},
+						sexualContent: {
+							name: 'sexual_content',
+							description: 'Block sexually explicit content (default: on)'
+						},
+						slurs: {
+							name: 'slurs',
+							description: 'Block slurs/hate speech (default: on)'
+						}
+					}
+				},
+				mentionSpam: {
+					name: 'mention-spam',
+					description: 'Block messages that mention too many users/roles',
+					options: {
+						mentionLimit: {
+							name: 'mention_limit',
+							description: 'Max mentions allowed per message (1-50)'
+						},
+						raidProtection: {
+							name: 'raid_protection',
+							description: 'Automatically detect mention raids (default: on)'
+						}
+					}
+				},
+				spam: {
+					name: 'spam',
+					description: "Block messages Discord's spam classifier detects as spam"
+				},
+				memberProfile: {
+					name: 'member-profile',
+					description: 'Block members whose nickname/bio contains specific keywords',
+					options: {
+						keywords: {
+							name: 'keywords',
+							description: 'Comma-separated keywords to block'
+						}
+					}
+				}
+			},
+			list: {
+				name: 'list',
+				description: 'List all AutoMod rules in this server'
+			},
+			delete: {
+				name: 'delete',
+				description: 'Delete one or more AutoMod rules'
+			},
+			createdReply: '✅ Created AutoMod rule **{{name}}**.',
+			listTitle: 'AutoMod rules',
+			listEmpty: 'This server has no AutoMod rules yet.',
+			listEntry: '**{{index}}. {{name}}** — {{trigger}} · {{status}}',
+			deleteTitle: 'Select rules to delete',
+			deleteSelectPlaceholder: 'Select one or more rules to delete',
+			deleteReply: '🗑️ Deleted {{count}} rule(s).',
+			status: {
+				enabled: 'Enabled',
+				disabled: 'Disabled'
+			},
+			triggers: {
+				keyword: 'Keyword',
+				preset: 'Preset word list',
+				mentionSpam: 'Mention spam',
+				spam: 'Spam',
+				memberProfile: 'Member profile keyword'
+			}
 		}
 	},
 	common: {

@@ -3,10 +3,11 @@ import { CurrentTranslate, localizationMapByKey, TranslationFn } from "@necord/l
 import { MessageFlags, PermissionFlagsBits } from "discord.js";
 import {
   Context,
+  createCommandGroupDecorator,
   Options,
   SelectedStrings,
-  SlashCommand,
   SlashCommandContext,
+  Subcommand,
   StringSelect,
   StringSelectContext,
 } from "necord";
@@ -18,22 +19,30 @@ import { WarnRemoveDto } from "./dto/warn-remove.dto";
 import { WarningsDto } from "./dto/warnings.dto";
 import { WarnService } from "./services/warn.service";
 
+export const WarnGroup = createCommandGroupDecorator({
+  name: "warn",
+  description: "Manage member warnings",
+  dmPermission: false,
+  defaultMemberPermissions: PermissionFlagsBits.ModerateMembers,
+  nameLocalizations: localizationMapByKey(TranslationKey.WarnGroupName),
+  descriptionLocalizations: localizationMapByKey(TranslationKey.WarnGroupDescription),
+});
+
 @Injectable()
+@WarnGroup()
 export class WarnCommands {
   constructor(
     private readonly warnService: WarnService,
     private readonly paginatorService: PaginatorService,
   ) {}
 
-  @SlashCommand({
-    name: "warn",
+  @Subcommand({
+    name: "add",
     description: "Warn a member",
-    dmPermission: false,
-    defaultMemberPermissions: PermissionFlagsBits.ModerateMembers,
-    nameLocalizations: localizationMapByKey(TranslationKey.WarnCommandName),
-    descriptionLocalizations: localizationMapByKey(TranslationKey.WarnCommandDescription),
+    nameLocalizations: localizationMapByKey(TranslationKey.WarnAddSubName),
+    descriptionLocalizations: localizationMapByKey(TranslationKey.WarnAddSubDescription),
   })
-  public async warn(
+  public async add(
     @Context() [interaction]: SlashCommandContext,
     @Options() { member, reason }: WarnDto,
     @CurrentTranslate() t: TranslationFn,
@@ -44,15 +53,13 @@ export class WarnCommands {
     );
   }
 
-  @SlashCommand({
-    name: "warnings",
+  @Subcommand({
+    name: "list",
     description: "Show a member's warning history",
-    dmPermission: false,
-    defaultMemberPermissions: PermissionFlagsBits.ModerateMembers,
-    nameLocalizations: localizationMapByKey(TranslationKey.WarningsCommandName),
-    descriptionLocalizations: localizationMapByKey(TranslationKey.WarningsCommandDescription),
+    nameLocalizations: localizationMapByKey(TranslationKey.WarnListSubName),
+    descriptionLocalizations: localizationMapByKey(TranslationKey.WarnListSubDescription),
   })
-  public async warnings(
+  public async list(
     @Context() [interaction]: SlashCommandContext,
     @Options() { member }: WarningsDto,
     @CurrentTranslate() t: TranslationFn,
@@ -63,15 +70,13 @@ export class WarnCommands {
     return interaction.reply(payload);
   }
 
-  @SlashCommand({
-    name: "warnings-all",
+  @Subcommand({
+    name: "list-all",
     description: "Show the warning history of every member in this server",
-    dmPermission: false,
-    defaultMemberPermissions: PermissionFlagsBits.ModerateMembers,
-    nameLocalizations: localizationMapByKey(TranslationKey.WarningsAllCommandName),
-    descriptionLocalizations: localizationMapByKey(TranslationKey.WarningsAllCommandDescription),
+    nameLocalizations: localizationMapByKey(TranslationKey.WarnListAllSubName),
+    descriptionLocalizations: localizationMapByKey(TranslationKey.WarnListAllSubDescription),
   })
-  public async warningsAll(
+  public async listAll(
     @Context() [interaction]: SlashCommandContext,
     @CurrentTranslate() t: TranslationFn,
   ) {
@@ -103,15 +108,13 @@ export class WarnCommands {
     return interaction.reply({ ...payload, flags: MessageFlags.Ephemeral });
   }
 
-  @SlashCommand({
-    name: "warn-remove",
+  @Subcommand({
+    name: "remove",
     description: "Remove one or more warnings from a member",
-    dmPermission: false,
-    defaultMemberPermissions: PermissionFlagsBits.ModerateMembers,
-    nameLocalizations: localizationMapByKey(TranslationKey.WarnRemoveCommandName),
-    descriptionLocalizations: localizationMapByKey(TranslationKey.WarnRemoveCommandDescription),
+    nameLocalizations: localizationMapByKey(TranslationKey.WarnRemoveSubName),
+    descriptionLocalizations: localizationMapByKey(TranslationKey.WarnRemoveSubDescription),
   })
-  public async warnRemove(
+  public async remove(
     @Context() [interaction]: SlashCommandContext,
     @Options() { member }: WarnRemoveDto,
     @CurrentTranslate() t: TranslationFn,

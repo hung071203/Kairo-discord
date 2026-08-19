@@ -198,7 +198,23 @@ export default {
 		},
 		warn: {
 			name: 'warn',
-			description: 'Cảnh cáo một thành viên',
+			description: 'Quản lý cảnh cáo thành viên',
+			add: {
+				name: 'add',
+				description: 'Cảnh cáo một thành viên'
+			},
+			list: {
+				name: 'list',
+				description: 'Xem lịch sử cảnh cáo của một thành viên'
+			},
+			listAll: {
+				name: 'list-all',
+				description: 'Xem lịch sử cảnh cáo của tất cả thành viên trong server'
+			},
+			remove: {
+				name: 'remove',
+				description: 'Xóa một hoặc nhiều cảnh cáo của một thành viên'
+			},
 			options: {
 				member: {
 					name: 'member',
@@ -212,8 +228,6 @@ export default {
 			reply: '⚠️ Đã cảnh cáo {{target}}. Lý do: {{reason}}'
 		},
 		warnings: {
-			name: 'warnings',
-			description: 'Xem lịch sử cảnh cáo của một thành viên',
 			options: {
 				member: {
 					name: 'member',
@@ -226,8 +240,6 @@ export default {
 			entryValue: 'Bởi {{moderator}} — {{reason}}'
 		},
 		warningsAll: {
-			name: 'warnings-all',
-			description: 'Xem lịch sử cảnh cáo của tất cả thành viên trong server',
 			title: 'Tổng hợp cảnh cáo',
 			empty: 'Chưa có thành viên nào bị cảnh cáo.',
 			entry: '**{{index}}.** {{target}} — {{count}} lần cảnh cáo',
@@ -235,8 +247,6 @@ export default {
 			selectOptionDescription: '{{count}} lần cảnh cáo'
 		},
 		warnRemove: {
-			name: 'warn-remove',
-			description: 'Xóa một hoặc nhiều cảnh cáo của một thành viên',
 			options: {
 				member: {
 					name: 'member',
@@ -248,6 +258,110 @@ export default {
 			entry: '#{{index}} · {{date}} — {{reason}}',
 			selectPlaceholder: 'Chọn một hoặc nhiều cảnh cáo cần xóa',
 			reply: '🗑️ Đã xóa {{count}} cảnh cáo.'
+		},
+		automodRule: {
+			name: 'automod-rule',
+			description: 'Quản lý các rule AutoMod của server',
+			options: {
+				name: {
+					name: 'name',
+					description: 'Tên cho rule này'
+				},
+				alertChannel: {
+					name: 'alert_channel',
+					description: 'Channel nhận log khi rule này trigger (không bắt buộc)'
+				},
+				timeoutMinutes: {
+					name: 'timeout_minutes',
+					description: 'Timeout thành viên bao nhiêu phút khi bị trigger (không bắt buộc)'
+				}
+			},
+			create: {
+				name: 'create',
+				description: 'Tạo rule AutoMod mới',
+				keyword: {
+					name: 'keyword',
+					description: 'Chặn tin nhắn chứa từ khóa cụ thể',
+					options: {
+						keywords: {
+							name: 'keywords',
+							description: 'Các từ khóa cần chặn, ngăn cách bởi dấu phẩy'
+						}
+					}
+				},
+				preset: {
+					name: 'preset',
+					description: 'Chặn tin nhắn theo danh sách từ có sẵn của Discord',
+					options: {
+						profanity: {
+							name: 'profanity',
+							description: 'Chặn chửi bậy/tục tĩu (mặc định: bật)'
+						},
+						sexualContent: {
+							name: 'sexual_content',
+							description: 'Chặn nội dung khiêu dâm (mặc định: bật)'
+						},
+						slurs: {
+							name: 'slurs',
+							description: 'Chặn từ phân biệt/xúc phạm (mặc định: bật)'
+						}
+					}
+				},
+				mentionSpam: {
+					name: 'mention-spam',
+					description: 'Chặn tin nhắn mention quá nhiều người/role',
+					options: {
+						mentionLimit: {
+							name: 'mention_limit',
+							description: 'Số mention tối đa mỗi tin nhắn (1-50)'
+						},
+						raidProtection: {
+							name: 'raid_protection',
+							description: 'Tự động phát hiện mention raid (mặc định: bật)'
+						}
+					}
+				},
+				spam: {
+					name: 'spam',
+					description: 'Chặn tin nhắn bị bộ phân loại spam của Discord phát hiện'
+				},
+				memberProfile: {
+					name: 'member-profile',
+					description: 'Chặn thành viên có nickname/bio chứa từ khóa cụ thể',
+					options: {
+						keywords: {
+							name: 'keywords',
+							description: 'Các từ khóa cần chặn, ngăn cách bởi dấu phẩy'
+						}
+					}
+				}
+			},
+			list: {
+				name: 'list',
+				description: 'Xem danh sách rule AutoMod của server'
+			},
+			delete: {
+				name: 'delete',
+				description: 'Xóa một hoặc nhiều rule AutoMod'
+			},
+			createdReply: '✅ Đã tạo rule AutoMod **{{name}}**.',
+			listTitle: 'Danh sách rule AutoMod',
+			listEmpty: 'Server chưa có rule AutoMod nào.',
+			listEntry: '**{{index}}. {{name}}** — {{trigger}} · {{status}}',
+			deleteTitle: 'Chọn rule cần xóa',
+			deleteSelectPlaceholder: 'Chọn một hoặc nhiều rule cần xóa',
+			deleteReply: '🗑️ Đã xóa {{count}} rule.',
+			status: {
+				enabled: 'Đang bật',
+				disabled: 'Đang tắt'
+			},
+			triggers: {
+				keyword: 'Từ khóa',
+				preset: 'Danh sách từ có sẵn',
+				mentionSpam: 'Mention spam',
+				spam: 'Spam',
+				memberProfile: 'Từ khóa hồ sơ thành viên'
+			}
 		}
 	},
 	common: {

@@ -45,7 +45,70 @@ export default {
 				}
 			},
 			title: 'Avatar của {{username}}'
+		},
+		help: {
+			name: 'help',
+			description: 'Xem danh sách các lệnh',
+			title: 'Danh sách lệnh'
+		},
+		uptime: {
+			name: 'uptime',
+			description: 'Xem bot đã hoạt động bao lâu',
+			reply: 'Bot đã hoạt động từ {{timestamp}}'
+		},
+		roleinfo: {
+			name: 'roleinfo',
+			description: 'Xem thông tin của một role',
+			options: {
+				role: {
+					name: 'role',
+					description: 'Role cần xem thông tin'
+				}
+			},
+			fields: {
+				id: 'ID',
+				color: 'Màu',
+				position: 'Vị trí',
+				members: 'Thành viên',
+				mentionable: 'Có thể mention',
+				hoisted: 'Hiển thị riêng',
+				createdAt: 'Ngày tạo'
+			}
+		},
+		channelinfo: {
+			name: 'channelinfo',
+			description: 'Xem thông tin của một channel',
+			options: {
+				channel: {
+					name: 'channel',
+					description: 'Channel cần xem thông tin'
+				}
+			},
+			fields: {
+				id: 'ID',
+				type: 'Loại',
+				category: 'Danh mục',
+				topic: 'Chủ đề',
+				createdAt: 'Ngày tạo'
+			},
+			types: {
+				text: 'Văn bản',
+				voice: 'Voice',
+				category: 'Danh mục',
+				announcement: 'Thông báo',
+				forum: 'Forum',
+				stage: 'Stage'
+			}
+		},
+		invite: {
+			name: 'invite',
+			description: 'Tạo link mời cho channel này',
+			reply: 'Đây là link mời của bạn: {{url}}'
 		}
+	},
+	common: {
+		yes: 'Có',
+		no: 'Không'
 	},
 	errors: {
 		missingPermissions: '⚠️ Bot không có đủ quyền để thực hiện lệnh này. Vui lòng kiểm tra lại quyền của role bot trong server.',

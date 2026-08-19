@@ -1,6 +1,21 @@
 import { Injectable } from "@nestjs/common";
 import { TranslationFn } from "@necord/localization";
-import { EmbedBuilder, Guild, GuildMember, User } from "discord.js";
+import {
+  ChannelType,
+  Client,
+  EmbedBuilder,
+  ForumChannel,
+  Guild,
+  GuildBasedChannel,
+  GuildMember,
+  MediaChannel,
+  NewsChannel,
+  Role,
+  StageChannel,
+  TextChannel,
+  User,
+  VoiceChannel,
+} from "discord.js";
 import { TranslationKey } from "@lib/common/translationKey.common";
 import { DateUtil } from "@lib/utils/date.util";
 
@@ -80,5 +95,121 @@ export class UtilityService {
       .setColor(member?.displayColor || null)
       .setTitle(t(TranslationKey.AvatarTitle, { username: user.username }))
       .setImage(avatarUrl);
+  }
+
+  public buildHelpEmbed(t: TranslationFn): EmbedBuilder {
+    const commands: { nameKey: TranslationKey; descriptionKey: TranslationKey }[] = [
+      { nameKey: TranslationKey.PingCommandName, descriptionKey: TranslationKey.PingCommandDescription },
+      { nameKey: TranslationKey.UserInfoCommandName, descriptionKey: TranslationKey.UserInfoCommandDescription },
+      { nameKey: TranslationKey.ServerInfoCommandName, descriptionKey: TranslationKey.ServerInfoCommandDescription },
+      { nameKey: TranslationKey.AvatarCommandName, descriptionKey: TranslationKey.AvatarCommandDescription },
+      { nameKey: TranslationKey.UptimeCommandName, descriptionKey: TranslationKey.UptimeCommandDescription },
+      { nameKey: TranslationKey.RoleInfoCommandName, descriptionKey: TranslationKey.RoleInfoCommandDescription },
+      { nameKey: TranslationKey.ChannelInfoCommandName, descriptionKey: TranslationKey.ChannelInfoCommandDescription },
+      { nameKey: TranslationKey.InviteCommandName, descriptionKey: TranslationKey.InviteCommandDescription },
+      { nameKey: TranslationKey.HelpCommandName, descriptionKey: TranslationKey.HelpCommandDescription },
+    ];
+
+    return new EmbedBuilder()
+      .setColor(null)
+      .setTitle(t(TranslationKey.HelpTitle))
+      .addFields(
+        commands.map(({ nameKey, descriptionKey }) => ({
+          name: `/${t(nameKey)}`,
+          value: t(descriptionKey),
+        })),
+      );
+  }
+
+  public buildUptimeEmbed(client: Client, t: TranslationFn): EmbedBuilder {
+    const readyTimestamp = client.readyTimestamp ?? Date.now();
+
+    return new EmbedBuilder()
+      .setColor(null)
+      .setDescription(
+        t(TranslationKey.UptimeReply, {
+          timestamp: DateUtil.toDiscordTimestamp(readyTimestamp, "R"),
+        }),
+      );
+  }
+
+  public buildRoleInfoEmbed(role: Role, t: TranslationFn): EmbedBuilder {
+    return new EmbedBuilder()
+      .setColor(role.colors.primaryColor || null)
+      .setTitle(role.name)
+      .setFooter({ text: role.id })
+      .addFields(
+        { name: t(TranslationKey.RoleInfoId), value: role.id, inline: true },
+        { name: t(TranslationKey.RoleInfoColor), value: role.hexColor, inline: true },
+        { name: t(TranslationKey.RoleInfoPosition), value: String(role.position), inline: true },
+        { name: t(TranslationKey.RoleInfoMembers), value: String(role.members.size), inline: true },
+        {
+          name: t(TranslationKey.RoleInfoMentionable),
+          value: role.mentionable ? t(TranslationKey.CommonYes) : t(TranslationKey.CommonNo),
+          inline: true,
+        },
+        {
+          name: t(TranslationKey.RoleInfoHoisted),
+          value: role.hoist ? t(TranslationKey.CommonYes) : t(TranslationKey.CommonNo),
+          inline: true,
+        },
+        {
+          name: t(TranslationKey.RoleInfoCreatedAt),
+          value: DateUtil.toDiscordTimestamp(role.createdTimestamp, "F"),
+          inline: true,
+        },
+      );
+  }
+
+  public buildChannelInfoEmbed(channel: GuildBasedChannel, t: TranslationFn): EmbedBuilder {
+    const embed = new EmbedBuilder()
+      .setColor(null)
+      .setTitle(channel.name)
+      .setFooter({ text: channel.id })
+      .addFields(
+        { name: t(TranslationKey.ChannelInfoId), value: channel.id, inline: true },
+        { name: t(TranslationKey.ChannelInfoType), value: this.getChannelTypeLabel(channel.type, t), inline: true },
+        {
+          name: t(TranslationKey.ChannelInfoCreatedAt),
+          value: DateUtil.toDiscordTimestamp(channel.createdTimestamp ?? Date.now(), "F"),
+          inline: true,
+        },
+      );
+
+    if (channel.parent) {
+      embed.addFields({ name: t(TranslationKey.ChannelInfoCategory), value: channel.parent.name, inline: true });
+    }
+
+    if ("topic" in channel && channel.topic) {
+      embed.addFields({ name: t(TranslationKey.ChannelInfoTopic), value: channel.topic });
+    }
+
+    return embed;
+  }
+
+  public async createChannelInvite(
+    channel: TextChannel | NewsChannel | VoiceChannel | StageChannel | ForumChannel | MediaChannel,
+  ): Promise<string> {
+    const invite = await channel.createInvite({
+      maxAge: 7 * 24 * 60 * 60,
+      maxUses: 0,
+      unique: false,
+    });
+
+    return invite.url;
+  }
+
+  private getChannelTypeLabel(type: ChannelType, t: TranslationFn): string {
+    const labelKeyByType: Partial<Record<ChannelType, TranslationKey>> = {
+      [ChannelType.GuildText]: TranslationKey.ChannelInfoTypeText,
+      [ChannelType.GuildVoice]: TranslationKey.ChannelInfoTypeVoice,
+      [ChannelType.GuildCategory]: TranslationKey.ChannelInfoTypeCategory,
+      [ChannelType.GuildAnnouncement]: TranslationKey.ChannelInfoTypeAnnouncement,
+      [ChannelType.GuildForum]: TranslationKey.ChannelInfoTypeForum,
+      [ChannelType.GuildStageVoice]: TranslationKey.ChannelInfoTypeStage,
+    };
+
+    const labelKey = labelKeyByType[type];
+    return labelKey ? t(labelKey) : String(type);
   }
 }

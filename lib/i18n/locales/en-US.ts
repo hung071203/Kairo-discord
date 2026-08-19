@@ -104,11 +104,147 @@ export default {
 			name: 'invite',
 			description: 'Create an invite link for this channel',
 			reply: 'Here is your invite link: {{url}}'
+		},
+		kick: {
+			name: 'kick',
+			description: 'Kick a member from the server',
+			options: {
+				member: {
+					name: 'member',
+					description: 'The member to kick'
+				},
+				reason: {
+					name: 'reason',
+					description: 'The reason for the kick'
+				}
+			},
+			reply: '👢 Kicked {{target}}. Reason: {{reason}}'
+		},
+		ban: {
+			name: 'ban',
+			description: 'Ban a user from the server',
+			options: {
+				user: {
+					name: 'user',
+					description: 'The user to ban'
+				},
+				reason: {
+					name: 'reason',
+					description: 'The reason for the ban'
+				},
+				deleteMessageSeconds: {
+					name: 'delete_message_seconds',
+					description: "Delete this user's messages sent in the last X seconds (max 7 days)"
+				}
+			},
+			reply: '🔨 Banned {{target}}. Reason: {{reason}}'
+		},
+		unban: {
+			name: 'unban',
+			description: 'Unban a user from the server',
+			options: {
+				user: {
+					name: 'user',
+					description: 'The user to unban'
+				},
+				reason: {
+					name: 'reason',
+					description: 'The reason for the unban'
+				}
+			},
+			reply: '✅ Unbanned {{target}}. Reason: {{reason}}'
+		},
+		mute: {
+			name: 'mute',
+			description: 'Temporarily mute a member',
+			options: {
+				member: {
+					name: 'member',
+					description: 'The member to mute'
+				},
+				duration: {
+					name: 'duration',
+					description: 'Mute duration in minutes (max 40320, 28 days)'
+				},
+				reason: {
+					name: 'reason',
+					description: 'The reason for the mute'
+				}
+			},
+			reply: '🔇 Muted {{target}} for {{duration}} minute(s). Reason: {{reason}}'
+		},
+		purge: {
+			name: 'purge',
+			description: 'Delete a number of recent messages in this channel',
+			options: {
+				amount: {
+					name: 'amount',
+					description: 'Number of messages to delete (1-100)'
+				}
+			},
+			reply: '🧹 Deleted {{amount}} message(s).'
+		},
+		slowmode: {
+			name: 'slowmode',
+			description: 'Set slowmode for this channel',
+			options: {
+				seconds: {
+					name: 'seconds',
+					description: 'Slowmode duration in seconds (0 to disable, max 21600)'
+				}
+			},
+			reply: '🐌 Slowmode set to {{seconds}} second(s) for this channel.',
+			replyDisabled: '🐌 Slowmode disabled for this channel.'
+		},
+		warn: {
+			name: 'warn',
+			description: 'Warn a member',
+			options: {
+				member: {
+					name: 'member',
+					description: 'The member to warn'
+				},
+				reason: {
+					name: 'reason',
+					description: 'The reason for the warning'
+				}
+			},
+			reply: '⚠️ Warned {{target}}. Reason: {{reason}}'
+		},
+		warnings: {
+			name: 'warnings',
+			description: "Show a member's warning history",
+			options: {
+				member: {
+					name: 'member',
+					description: 'The member to look up'
+				}
+			},
+			title: "{{username}}'s warnings",
+			empty: 'This member has no warnings.',
+			entryName: '#{{index}} · {{date}}',
+			entryValue: 'By {{moderator}} — {{reason}}'
+		},
+		warningsAll: {
+			name: 'warnings-all',
+			description: 'Show the warning history of every member in this server',
+			title: 'Warnings overview',
+			empty: 'No member has any warnings.',
+			entry: '**{{index}}.** {{target}} — {{count}} warning(s)',
+			selectPlaceholder: 'Select a member to see their warning history',
+			selectOptionDescription: '{{count}} warning(s)'
 		}
 	},
 	common: {
 		yes: 'Yes',
 		no: 'No'
+	},
+	moderation: {
+		noReasonProvided: 'No reason provided'
+	},
+	pagination: {
+		expired: '⚠️ This pagination has expired. Please run the command again.',
+		notOwner: '⚠️ Only the person who ran this command can use these buttons.'
 	},
 	errors: {
 		missingPermissions: '⚠️ I am missing the permissions required to run this command. Please check my role permissions in this server.',

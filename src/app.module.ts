@@ -7,6 +7,7 @@ import { env } from "@lib/configs/env.config";
 import { localizationAdapter } from "@lib/i18n";
 import { DiscordExceptionFilter } from "@lib/filters/discord-exception.filter";
 import { DatabaseModule } from "@lib/database/database.module";
+import { PaginationModule } from "@lib/pagination/pagination.module";
 import { AutomodModule } from "./modules/automod/automod.module";
 import { MediaModule } from "./modules/media/media.module";
 import { ModerationModule } from "./modules/moderation/moderation.module";
@@ -46,6 +47,7 @@ import { UtilityModule } from "./modules/utility/utility.module";
       adapter: localizationAdapter,
     }),
     DatabaseModule,
+    PaginationModule,
     UtilityModule,
     ModerationModule,
     MediaModule,

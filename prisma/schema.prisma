@@ -5,3 +5,15 @@ generator client {
 datasource db {
   provider = "mysql"
 }
+
+model Warning {
+  id          String   @id @default(cuid())
+  guildId     String
+  userId      String
+  moderatorId String
+  reason      String
+  createdAt   DateTime @default(now())
+
+  @@index([guildId, userId])
+  @@map("warnings")
+}

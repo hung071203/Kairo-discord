@@ -104,11 +104,147 @@ export default {
 			name: 'invite',
 			description: 'Tạo link mời cho channel này',
 			reply: 'Đây là link mời của bạn: {{url}}'
+		},
+		kick: {
+			name: 'kick',
+			description: 'Kick một thành viên khỏi server',
+			options: {
+				member: {
+					name: 'member',
+					description: 'Thành viên cần kick'
+				},
+				reason: {
+					name: 'reason',
+					description: 'Lý do kick'
+				}
+			},
+			reply: '👢 Đã kick {{target}}. Lý do: {{reason}}'
+		},
+		ban: {
+			name: 'ban',
+			description: 'Cấm một user khỏi server',
+			options: {
+				user: {
+					name: 'user',
+					description: 'User cần cấm'
+				},
+				reason: {
+					name: 'reason',
+					description: 'Lý do cấm'
+				},
+				deleteMessageSeconds: {
+					name: 'delete_message_seconds',
+					description: 'Xóa tin nhắn của user này trong X giây gần nhất (tối đa 7 ngày)'
+				}
+			},
+			reply: '🔨 Đã cấm {{target}}. Lý do: {{reason}}'
+		},
+		unban: {
+			name: 'unban',
+			description: 'Gỡ cấm một user khỏi server',
+			options: {
+				user: {
+					name: 'user',
+					description: 'User cần gỡ cấm'
+				},
+				reason: {
+					name: 'reason',
+					description: 'Lý do gỡ cấm'
+				}
+			},
+			reply: '✅ Đã gỡ cấm {{target}}. Lý do: {{reason}}'
+		},
+		mute: {
+			name: 'mute',
+			description: 'Mute tạm thời một thành viên',
+			options: {
+				member: {
+					name: 'member',
+					description: 'Thành viên cần mute'
+				},
+				duration: {
+					name: 'duration',
+					description: 'Thời gian mute tính bằng phút (tối đa 40320, 28 ngày)'
+				},
+				reason: {
+					name: 'reason',
+					description: 'Lý do mute'
+				}
+			},
+			reply: '🔇 Đã mute {{target}} trong {{duration}} phút. Lý do: {{reason}}'
+		},
+		purge: {
+			name: 'purge',
+			description: 'Xóa một số tin nhắn gần nhất trong channel này',
+			options: {
+				amount: {
+					name: 'amount',
+					description: 'Số tin nhắn cần xóa (1-100)'
+				}
+			},
+			reply: '🧹 Đã xóa {{amount}} tin nhắn.'
+		},
+		slowmode: {
+			name: 'slowmode',
+			description: 'Đặt slowmode cho channel này',
+			options: {
+				seconds: {
+					name: 'seconds',
+					description: 'Thời gian slowmode tính bằng giây (0 để tắt, tối đa 21600)'
+				}
+			},
+			reply: '🐌 Đã đặt slowmode {{seconds}} giây cho channel này.',
+			replyDisabled: '🐌 Đã tắt slowmode cho channel này.'
+		},
+		warn: {
+			name: 'warn',
+			description: 'Cảnh cáo một thành viên',
+			options: {
+				member: {
+					name: 'member',
+					description: 'Thành viên cần cảnh cáo'
+				},
+				reason: {
+					name: 'reason',
+					description: 'Lý do cảnh cáo'
+				}
+			},
+			reply: '⚠️ Đã cảnh cáo {{target}}. Lý do: {{reason}}'
+		},
+		warnings: {
+			name: 'warnings',
+			description: 'Xem lịch sử cảnh cáo của một thành viên',
+			options: {
+				member: {
+					name: 'member',
+					description: 'Thành viên cần xem lịch sử'
+				}
+			},
+			title: 'Lịch sử cảnh cáo của {{username}}',
+			empty: 'Thành viên này chưa có cảnh cáo nào.',
+			entryName: '#{{index}} · {{date}}',
+			entryValue: 'Bởi {{moderator}} — {{reason}}'
+		},
+		warningsAll: {
+			name: 'warnings-all',
+			description: 'Xem lịch sử cảnh cáo của tất cả thành viên trong server',
+			title: 'Tổng hợp cảnh cáo',
+			empty: 'Chưa có thành viên nào bị cảnh cáo.',
+			entry: '**{{index}}.** {{target}} — {{count}} lần cảnh cáo',
+			selectPlaceholder: 'Chọn một thành viên để xem lịch sử cảnh cáo',
+			selectOptionDescription: '{{count}} lần cảnh cáo'
 		}
 	},
 	common: {
 		yes: 'Có',
 		no: 'Không'
+	},
+	moderation: {
+		noReasonProvided: 'Không có lý do'
+	},
+	pagination: {
+		expired: '⚠️ Phiên xem trang này đã hết hạn. Vui lòng chạy lại lệnh.',
+		notOwner: '⚠️ Chỉ người đã chạy lệnh này mới có thể dùng các nút này.'
 	},
 	errors: {
 		missingPermissions: '⚠️ Bot không có đủ quyền để thực hiện lệnh này. Vui lòng kiểm tra lại quyền của role bot trong server.',

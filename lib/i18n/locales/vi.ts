@@ -233,6 +233,21 @@ export default {
 			entry: '**{{index}}.** {{target}} — {{count}} lần cảnh cáo',
 			selectPlaceholder: 'Chọn một thành viên để xem lịch sử cảnh cáo',
 			selectOptionDescription: '{{count}} lần cảnh cáo'
+		},
+		warnRemove: {
+			name: 'warn-remove',
+			description: 'Xóa một hoặc nhiều cảnh cáo của một thành viên',
+			options: {
+				member: {
+					name: 'member',
+					description: 'Thành viên cần xóa cảnh cáo'
+				}
+			},
+			title: 'Chọn cảnh cáo cần xóa của {{username}}',
+			empty: 'Thành viên này chưa có cảnh cáo nào.',
+			entry: '#{{index}} · {{date}} — {{reason}}',
+			selectPlaceholder: 'Chọn một hoặc nhiều cảnh cáo cần xóa',
+			reply: '🗑️ Đã xóa {{count}} cảnh cáo.'
 		}
 	},
 	common: {

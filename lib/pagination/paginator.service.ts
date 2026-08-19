@@ -7,6 +7,7 @@ import {
   ButtonStyle,
   EmbedBuilder,
   MessageActionRowComponentBuilder,
+  MessageFlags,
 } from "discord.js";
 import { fallbackLocale, localizationAdapter } from "@lib/i18n";
 import { TranslationKey } from "@lib/common/translationKey.common";
@@ -54,7 +55,7 @@ export class PaginatorService {
     if (!session) {
       await interaction.reply({
         content: localizationAdapter.getTranslation(TranslationKey.PaginatorExpired, locale),
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
@@ -62,7 +63,7 @@ export class PaginatorService {
     if (session.authorId !== interaction.user.id) {
       await interaction.reply({
         content: localizationAdapter.getTranslation(TranslationKey.PaginatorNotOwner, locale),
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
@@ -102,12 +103,12 @@ export class PaginatorService {
     return new ActionRowBuilder<ButtonBuilder>().addComponents(
       new ButtonBuilder()
         .setCustomId(`paginator/first/${sessionId}`)
-        .setEmoji("⏮")
+        .setLabel("<<")
         .setStyle(ButtonStyle.Secondary)
         .setDisabled(isFirst),
       new ButtonBuilder()
         .setCustomId(`paginator/prev/${sessionId}`)
-        .setEmoji("◀")
+        .setLabel("<")
         .setStyle(ButtonStyle.Secondary)
         .setDisabled(isFirst),
       new ButtonBuilder()
@@ -117,12 +118,12 @@ export class PaginatorService {
         .setDisabled(true),
       new ButtonBuilder()
         .setCustomId(`paginator/next/${sessionId}`)
-        .setEmoji("▶")
+        .setLabel(">")
         .setStyle(ButtonStyle.Secondary)
         .setDisabled(isLast),
       new ButtonBuilder()
         .setCustomId(`paginator/last/${sessionId}`)
-        .setEmoji("⏭")
+        .setLabel(">>")
         .setStyle(ButtonStyle.Secondary)
         .setDisabled(isLast),
     );

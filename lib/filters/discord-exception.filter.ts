@@ -1,5 +1,5 @@
 import { ArgumentsHost, Catch, ExceptionFilter, Logger } from "@nestjs/common";
-import { DiscordAPIError, RESTJSONErrorCodes } from "discord.js";
+import { DiscordAPIError, MessageFlags, RESTJSONErrorCodes } from "discord.js";
 import { NecordArgumentsHost } from "necord";
 import { fallbackLocale, localizationAdapter } from "@lib/i18n";
 import { TranslationKey } from "@lib/common/translationKey.common";
@@ -9,7 +9,7 @@ interface RepliableLike {
   isRepliable?: () => boolean;
   deferred?: boolean;
   replied?: boolean;
-  reply: (options: { content: string; ephemeral: boolean }) => Promise<unknown>;
+  reply: (options: { content: string; flags: MessageFlags.Ephemeral }) => Promise<unknown>;
   editReply: (options: { content: string }) => Promise<unknown>;
 }
 
@@ -43,7 +43,7 @@ export class DiscordExceptionFilter implements ExceptionFilter {
     if (interaction.deferred || interaction.replied) {
       await interaction.editReply({ content: message });
     } else {
-      await interaction.reply({ content: message, ephemeral: true });
+      await interaction.reply({ content: message, flags: MessageFlags.Ephemeral });
     }
   }
 

@@ -233,6 +233,21 @@ export default {
 			entry: '**{{index}}.** {{target}} — {{count}} warning(s)',
 			selectPlaceholder: 'Select a member to see their warning history',
 			selectOptionDescription: '{{count}} warning(s)'
+		},
+		warnRemove: {
+			name: 'warn-remove',
+			description: 'Remove one or more warnings from a member',
+			options: {
+				member: {
+					name: 'member',
+					description: 'The member to remove warnings from'
+				}
+			},
+			title: "Select warnings to remove from {{username}}",
+			empty: 'This member has no warnings.',
+			entry: '#{{index}} · {{date}} — {{reason}}',
+			selectPlaceholder: 'Select one or more warnings to remove',
+			reply: '🗑️ Removed {{count}} warning(s).'
 		}
 	},
 	common: {

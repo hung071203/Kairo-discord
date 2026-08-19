@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { CurrentTranslate, localizationMapByKey, TranslationFn } from "@necord/localization";
-import { PermissionFlagsBits } from "discord.js";
+import { MessageFlags, PermissionFlagsBits } from "discord.js";
 import {
   Context,
   Options,
@@ -14,6 +14,7 @@ import { fallbackLocale, localizationAdapter } from "@lib/i18n";
 import { TranslationKey } from "@lib/common/translationKey.common";
 import { PaginatorService } from "@lib/pagination/paginator.service";
 import { WarnDto } from "./dto/warn.dto";
+import { WarnRemoveDto } from "./dto/warn-remove.dto";
 import { WarningsDto } from "./dto/warnings.dto";
 import { WarnService } from "./services/warn.service";
 
@@ -91,7 +92,7 @@ export class WarnCommands {
     if (!interaction.memberPermissions?.has(PermissionFlagsBits.ModerateMembers)) {
       return interaction.reply({
         content: t(TranslationKey.ErrorMissingPermissions),
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
 
@@ -99,6 +100,47 @@ export class WarnCommands {
     const user = await interaction.client.users.fetch(userId).catch(() => null);
     const pages = this.warnService.buildWarningsPages(user?.username ?? userId, warnings, t);
     const payload = this.paginatorService.createPaginator(interaction.user.id, pages);
-    return interaction.reply({ ...payload, ephemeral: true });
+    return interaction.reply({ ...payload, flags: MessageFlags.Ephemeral });
+  }
+
+  @SlashCommand({
+    name: "warn-remove",
+    description: "Remove one or more warnings from a member",
+    dmPermission: false,
+    defaultMemberPermissions: PermissionFlagsBits.ModerateMembers,
+    nameLocalizations: localizationMapByKey(TranslationKey.WarnRemoveCommandName),
+    descriptionLocalizations: localizationMapByKey(TranslationKey.WarnRemoveCommandDescription),
+  })
+  public async warnRemove(
+    @Context() [interaction]: SlashCommandContext,
+    @Options() { member }: WarnRemoveDto,
+    @CurrentTranslate() t: TranslationFn,
+  ) {
+    const warnings = await this.warnService.listWarnings(interaction.guildId!, member.id);
+    const pages = this.warnService.buildWarningRemovalPages(member.user.username, warnings, t);
+    const payload = this.paginatorService.createPaginator(interaction.user.id, pages);
+    return interaction.reply({ ...payload, flags: MessageFlags.Ephemeral });
+  }
+
+  @StringSelect("warn-remove/select")
+  public async onSelectWarningsToRemove(
+    @Context() [interaction]: StringSelectContext,
+    @SelectedStrings() warningIds: string[],
+  ) {
+    const locale = interaction.locale ?? fallbackLocale;
+    const t: TranslationFn = (key, ...args) => localizationAdapter.getTranslation(key, locale, ...args);
+
+    if (!interaction.memberPermissions?.has(PermissionFlagsBits.ModerateMembers)) {
+      return interaction.reply({
+        content: t(TranslationKey.ErrorMissingPermissions),
+        flags: MessageFlags.Ephemeral,
+      });
+    }
+
+    const deletedCount = await this.warnService.deleteWarnings(interaction.guildId!, warningIds);
+    return interaction.reply({
+      content: t(TranslationKey.WarnRemoveReply, { count: String(deletedCount) }),
+      flags: MessageFlags.Ephemeral,
+    });
   }
 }

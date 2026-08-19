@@ -150,6 +150,16 @@ export enum TranslationKey {
   WarningsAllSelectPlaceholder = "commands.warningsAll.selectPlaceholder",
   WarningsAllSelectOptionDescription = "commands.warningsAll.selectOptionDescription",
 
+  WarnRemoveCommandName = "commands.warnRemove.name",
+  WarnRemoveCommandDescription = "commands.warnRemove.description",
+  WarnRemoveMemberOptionName = "commands.warnRemove.options.member.name",
+  WarnRemoveMemberOptionDescription = "commands.warnRemove.options.member.description",
+  WarnRemoveTitle = "commands.warnRemove.title",
+  WarnRemoveEmpty = "commands.warnRemove.empty",
+  WarnRemoveEntry = "commands.warnRemove.entry",
+  WarnRemoveSelectPlaceholder = "commands.warnRemove.selectPlaceholder",
+  WarnRemoveReply = "commands.warnRemove.reply",
+
   ErrorMissingPermissions = "errors.missingPermissions",
   ErrorMissingAccess = "errors.missingAccess",
   ErrorUnexpected = "errors.unexpected",

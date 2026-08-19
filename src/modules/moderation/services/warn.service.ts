@@ -22,6 +22,8 @@ export interface WarningSummary {
 export class WarnService {
   private static readonly WARNINGS_PER_PAGE = 5;
   private static readonly SUMMARIES_PER_PAGE = 10;
+  private static readonly REMOVAL_PER_PAGE = 10;
+  private static readonly SELECT_OPTION_DESCRIPTION_MAX_LENGTH = 100;
 
   constructor(private readonly prisma: PrismaService) {}
 
@@ -41,6 +43,14 @@ export class WarnService {
       where: { guildId, userId },
       orderBy: { createdAt: "desc" },
     });
+  }
+
+  public async deleteWarnings(guildId: string, warningIds: string[]): Promise<number> {
+    const result = await this.prisma.warning.deleteMany({
+      where: { guildId, id: { in: warningIds } },
+    });
+
+    return result.count;
   }
 
   public async listGuildWarningSummaries(guildId: string): Promise<WarningSummary[]> {
@@ -138,6 +148,55 @@ export class WarnService {
         };
       }),
     );
+  }
+
+  public buildWarningRemovalPages(username: string, warnings: Warning[], t: TranslationFn): PaginatorPage[] {
+    const title = t(TranslationKey.WarnRemoveTitle, { username });
+
+    if (warnings.length === 0) {
+      return [
+        {
+          embed: new EmbedBuilder().setColor(null).setTitle(title).setDescription(t(TranslationKey.WarnRemoveEmpty)),
+        },
+      ];
+    }
+
+    const chunks = this.chunk(warnings, WarnService.REMOVAL_PER_PAGE);
+
+    return chunks.map((chunk, chunkIndex) => {
+      const lines = chunk.map((warning, i) =>
+        t(TranslationKey.WarnRemoveEntry, {
+          index: String(chunkIndex * WarnService.REMOVAL_PER_PAGE + i + 1),
+          date: DateUtil.toDiscordTimestamp(warning.createdAt, "f"),
+          reason: warning.reason,
+        }),
+      );
+
+      const select = new StringSelectMenuBuilder()
+        .setCustomId("warn-remove/select")
+        .setPlaceholder(t(TranslationKey.WarnRemoveSelectPlaceholder))
+        .setMinValues(1)
+        .setMaxValues(chunk.length)
+        .addOptions(
+          chunk.map((warning, i) =>
+            new StringSelectMenuOptionBuilder()
+              .setLabel(
+                `#${chunkIndex * WarnService.REMOVAL_PER_PAGE + i + 1} · ${DateUtil.toPlainDateTime(warning.createdAt)}`,
+              )
+              .setDescription(this.truncate(warning.reason, WarnService.SELECT_OPTION_DESCRIPTION_MAX_LENGTH))
+              .setValue(warning.id),
+          ),
+        );
+
+      return {
+        embed: new EmbedBuilder().setColor(null).setTitle(title).setDescription(lines.join("\n")),
+        components: [new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(select)],
+      };
+    });
+  }
+
+  private truncate(text: string, maxLength: number): string {
+    return text.length > maxLength ? `${text.slice(0, maxLength - 1)}…` : text;
   }
 
   private chunk<T>(items: T[], size: number): T[][] {

@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { CurrentTranslate, localizationMapByKey, TranslationFn } from "@necord/localization";
-import { GuildTextBasedChannel, PermissionFlagsBits } from "discord.js";
+import { GuildTextBasedChannel, MessageFlags, PermissionFlagsBits } from "discord.js";
 import { Context, Options, SlashCommand, SlashCommandContext } from "necord";
 import { TranslationKey } from "@lib/common/translationKey.common";
 import { BanDto } from "./dto/ban.dto";
@@ -123,7 +123,7 @@ export class ModerationCommands {
     );
     return interaction.reply({
       content: t(TranslationKey.PurgeReply, { amount: String(deletedCount) }),
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
   }
 

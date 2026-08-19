@@ -8,6 +8,7 @@ try {
 
 const envSchema = z.object({
 	NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+	LOG_LEVEL: z.enum(['error', 'warn', 'log', 'debug', 'verbose']).default('log'),
 	DISCORD_TOKEN: z.string().min(1, 'DISCORD_TOKEN is required'),
 	DISCORD_DEV_GUILD_IDS: z
 		.string()

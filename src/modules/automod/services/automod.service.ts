@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { TranslationFn } from "@necord/localization";
 import {
   ActionRowBuilder,
@@ -26,11 +26,13 @@ interface CommonRuleOptions {
 
 @Injectable()
 export class AutomodService {
+  private readonly logger = new Logger(AutomodService.name);
+
   public async createKeywordRule(
     guild: Guild,
     params: CommonRuleOptions & { name: string; keywords: string[] },
   ): Promise<AutoModerationRule> {
-    return guild.autoModerationRules.create({
+    const rule = await guild.autoModerationRules.create({
       name: params.name,
       eventType: AutoModerationRuleEventType.MessageSend,
       triggerType: AutoModerationRuleTriggerType.Keyword,
@@ -38,6 +40,8 @@ export class AutomodService {
       actions: this.buildMessageActions(params),
       enabled: true,
     });
+    this.logCreated(guild, rule);
+    return rule;
   }
 
   public async createPresetRule(
@@ -49,7 +53,7 @@ export class AutomodService {
     if (params.sexualContent) presets.push(AutoModerationRuleKeywordPresetType.SexualContent);
     if (params.slurs) presets.push(AutoModerationRuleKeywordPresetType.Slurs);
 
-    return guild.autoModerationRules.create({
+    const rule = await guild.autoModerationRules.create({
       name: params.name,
       eventType: AutoModerationRuleEventType.MessageSend,
       triggerType: AutoModerationRuleTriggerType.KeywordPreset,
@@ -57,13 +61,15 @@ export class AutomodService {
       actions: this.buildMessageActions(params),
       enabled: true,
     });
+    this.logCreated(guild, rule);
+    return rule;
   }
 
   public async createMentionSpamRule(
     guild: Guild,
     params: CommonRuleOptions & { name: string; mentionLimit: number; raidProtection: boolean },
   ): Promise<AutoModerationRule> {
-    return guild.autoModerationRules.create({
+    const rule = await guild.autoModerationRules.create({
       name: params.name,
       eventType: AutoModerationRuleEventType.MessageSend,
       triggerType: AutoModerationRuleTriggerType.MentionSpam,
@@ -74,26 +80,30 @@ export class AutomodService {
       actions: this.buildMessageActions(params),
       enabled: true,
     });
+    this.logCreated(guild, rule);
+    return rule;
   }
 
   public async createSpamRule(
     guild: Guild,
     params: { name: string; alertChannel?: AlertChannel },
   ): Promise<AutoModerationRule> {
-    return guild.autoModerationRules.create({
+    const rule = await guild.autoModerationRules.create({
       name: params.name,
       eventType: AutoModerationRuleEventType.MessageSend,
       triggerType: AutoModerationRuleTriggerType.Spam,
       actions: this.buildMessageActions(params),
       enabled: true,
     });
+    this.logCreated(guild, rule);
+    return rule;
   }
 
   public async createMemberProfileRule(
     guild: Guild,
     params: { name: string; keywords: string[]; alertChannel?: AlertChannel },
   ): Promise<AutoModerationRule> {
-    return guild.autoModerationRules.create({
+    const rule = await guild.autoModerationRules.create({
       name: params.name,
       eventType: AutoModerationRuleEventType.MemberUpdate,
       triggerType: AutoModerationRuleTriggerType.MemberProfile,
@@ -101,6 +111,8 @@ export class AutomodService {
       actions: this.buildProfileActions(params),
       enabled: true,
     });
+    this.logCreated(guild, rule);
+    return rule;
   }
 
   public async listRules(guild: Guild): Promise<AutoModerationRule[]> {
@@ -110,7 +122,15 @@ export class AutomodService {
 
   public async deleteRules(guild: Guild, ruleIds: string[]): Promise<number> {
     const results = await Promise.allSettled(ruleIds.map((id) => guild.autoModerationRules.delete(id)));
-    return results.filter((result) => result.status === "fulfilled").length;
+    const deletedCount = results.filter((result) => result.status === "fulfilled").length;
+    this.logger.log(`Deleted ${deletedCount}/${ruleIds.length} AutoMod rule(s) in ${guild.name}`);
+    return deletedCount;
+  }
+
+  private logCreated(guild: Guild, rule: AutoModerationRule): void {
+    this.logger.log(
+      `Created AutoMod rule "${rule.name}" (${rule.id}) in ${guild.name} — trigger: ${rule.triggerType}`,
+    );
   }
 
   public buildRulesListEmbed(rules: AutoModerationRule[], t: TranslationFn): EmbedBuilder {

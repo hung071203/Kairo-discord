@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { TranslationFn } from "@necord/localization";
 import { Warning } from "@prisma/client";
 import {
@@ -25,6 +25,8 @@ export class WarnService {
   private static readonly REMOVAL_PER_PAGE = 10;
   private static readonly SELECT_OPTION_DESCRIPTION_MAX_LENGTH = 100;
 
+  private readonly logger = new Logger(WarnService.name);
+
   constructor(private readonly prisma: PrismaService) {}
 
   public async createWarning(
@@ -33,9 +35,11 @@ export class WarnService {
     moderatorId: string,
     reason: string,
   ): Promise<Warning> {
-    return this.prisma.warning.create({
+    const warning = await this.prisma.warning.create({
       data: { guildId, userId, moderatorId, reason },
     });
+    this.logger.log(`Warned user ${userId} in guild ${guildId} by ${moderatorId} — ${reason}`);
+    return warning;
   }
 
   public async listWarnings(guildId: string, userId: string): Promise<Warning[]> {
@@ -50,6 +54,7 @@ export class WarnService {
       where: { guildId, id: { in: warningIds } },
     });
 
+    this.logger.log(`Deleted ${result.count} warning(s) in guild ${guildId}`);
     return result.count;
   }
 

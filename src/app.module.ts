@@ -1,11 +1,12 @@
 import { Module } from "@nestjs/common";
-import { APP_FILTER } from "@nestjs/core";
+import { APP_FILTER, APP_INTERCEPTOR } from "@nestjs/core";
 import { IntentsBitField } from "discord.js";
 import { NecordModule } from "necord";
 import { NecordLocalizationModule, UserResolver } from "@necord/localization";
 import { env } from "@lib/configs/env.config";
 import { localizationAdapter } from "@lib/i18n";
 import { DiscordExceptionFilter } from "@lib/filters/discord-exception.filter";
+import { NecordLoggingInterceptor } from "@lib/interceptors/necord-logging.interceptor";
 import { DatabaseModule } from "@lib/database/database.module";
 import { PaginationModule } from "@lib/pagination/pagination.module";
 import { AutomodModule } from "./modules/automod/automod.module";
@@ -53,6 +54,9 @@ import { UtilityModule } from "./modules/utility/utility.module";
     MediaModule,
     AutomodModule,
   ],
-  providers: [{ provide: APP_FILTER, useClass: DiscordExceptionFilter }],
+  providers: [
+    { provide: APP_FILTER, useClass: DiscordExceptionFilter },
+    { provide: APP_INTERCEPTOR, useClass: NecordLoggingInterceptor },
+  ],
 })
 export class AppModule {}

@@ -259,6 +259,131 @@ export default {
 			selectPlaceholder: 'Select one or more warnings to remove',
 			reply: '🗑️ Removed {{count}} warning(s).'
 		},
+		role: {
+			name: 'role',
+			description: 'Add or remove roles from a member',
+			add: {
+				name: 'add',
+				description: 'Give a role to a member',
+				options: {
+					member: {
+						name: 'member',
+						description: 'The member to give the role to'
+					},
+					role: {
+						name: 'role',
+						description: 'The role to give'
+					},
+					reason: {
+						name: 'reason',
+						description: 'The reason for adding this role'
+					}
+				},
+				reply: '✅ Gave {{role}} to {{target}}.'
+			},
+			remove: {
+				name: 'remove',
+				description: 'Remove a role from a member',
+				options: {
+					member: {
+						name: 'member',
+						description: 'The member to remove the role from'
+					},
+					role: {
+						name: 'role',
+						description: 'The role to remove'
+					},
+					reason: {
+						name: 'reason',
+						description: 'The reason for removing this role'
+					}
+				},
+				reply: '✅ Removed {{role}} from {{target}}.'
+			}
+		},
+		lock: {
+			name: 'lock',
+			description: 'Lock a channel, preventing @everyone from sending messages',
+			options: {
+				channel: {
+					name: 'channel',
+					description: 'The channel to lock (defaults to the current channel)'
+				},
+				reason: {
+					name: 'reason',
+					description: 'The reason for locking this channel'
+				}
+			},
+			reply: '🔒 Locked {{channel}}.'
+		},
+		unlock: {
+			name: 'unlock',
+			description: "Unlock a channel, restoring @everyone's ability to send messages",
+			options: {
+				channel: {
+					name: 'channel',
+					description: 'The channel to unlock (defaults to the current channel)'
+				},
+				reason: {
+					name: 'reason',
+					description: 'The reason for unlocking this channel'
+				}
+			},
+			reply: '🔓 Unlocked {{channel}}.'
+		},
+		modlog: {
+			name: 'modlog',
+			description: 'Configure and view the moderation action log',
+			setChannel: {
+				name: 'set-channel',
+				description: 'Set the channel where all moderation actions get logged',
+				options: {
+					channel: {
+						name: 'channel',
+						description: 'Channel to send all moderation action logs to'
+					}
+				}
+			},
+			setChannelReply: '✅ Moderation actions will now be logged to {{channel}}.',
+			list: {
+				name: 'list',
+				description: 'Show the moderation action history for this server',
+				options: {
+					member: {
+						name: 'member',
+						description: 'Only show actions taken against this member (optional)'
+					}
+				}
+			},
+			listTitle: 'Moderation action log',
+			listEmpty: 'No moderation actions have been logged yet.',
+			entryName: '{{index}}. {{action}} — {{date}}',
+			entryValue: 'Target: {{target}} · By: {{moderator}}\n> {{reason}}',
+			fields: {
+				target: 'Target',
+				moderator: 'Moderator',
+				reason: 'Reason',
+				detail: 'Detail'
+			},
+			detail: {
+				durationMinutes: '{{duration}} minute(s)'
+			},
+			actions: {
+				kick: 'Kick',
+				ban: 'Ban',
+				unban: 'Unban',
+				mute: 'Mute',
+				roleAdd: 'Role added',
+				roleRemove: 'Role removed',
+				channelLock: 'Channel locked',
+				channelUnlock: 'Channel unlocked',
+				automodRuleCreate: 'AutoMod rule created',
+				automodRuleDelete: 'AutoMod rule deleted',
+				automodRuleToggle: 'AutoMod rule toggled',
+				automodRuleKeywordAdd: 'AutoMod keyword added',
+				automodRuleKeywordRemove: 'AutoMod keyword removed'
+			}
+		},
 		automodRule: {
 			name: 'automod-rule',
 			description: 'Manage AutoMod rules for this server',
@@ -358,6 +483,57 @@ export default {
 					}
 				}
 			},
+			removeKeyword: {
+				name: 'remove-keyword',
+				description: 'Remove keywords from an existing keyword rule',
+				options: {
+					ruleName: {
+						name: 'rule_name',
+						description: 'Name of the existing keyword rule to remove from'
+					},
+					keywords: {
+						name: 'keywords',
+						description: 'Comma-separated keywords to remove from the rule'
+					}
+				}
+			},
+			toggle: {
+				name: 'toggle',
+				description: 'Enable or disable a rule',
+				options: {
+					ruleName: {
+						name: 'rule_name',
+						description: 'Name of the rule to enable/disable'
+					}
+				}
+			},
+			view: {
+				name: 'view',
+				description: 'View the full details of a rule',
+				options: {
+					ruleName: {
+						name: 'rule_name',
+						description: 'Name of the rule to view'
+					}
+				},
+				fields: {
+					trigger: 'Trigger type',
+					status: 'Status',
+					keywords: 'Keywords',
+					presets: 'Preset word lists',
+					mentionLimit: 'Mention limit',
+					raidProtection: 'Raid protection',
+					alertChannel: 'Alert channel',
+					timeout: 'Timeout'
+				},
+				noneValue: 'None'
+			},
+			timeoutMinutesValue: '{{minutes}} minute(s)',
+			presetLabels: {
+				profanity: 'Profanity',
+				sexualContent: 'Sexual content',
+				slurs: 'Slurs'
+			},
 			createdReply: '✅ Created AutoMod rule **{{name}}**.',
 			listTitle: 'AutoMod rules',
 			listEmpty: 'This server has no AutoMod rules yet.',
@@ -366,7 +542,11 @@ export default {
 			deleteSelectPlaceholder: 'Select one or more rules to delete',
 			deleteReply: '🗑️ Deleted {{count}} rule(s).',
 			addKeywordReply: '✅ Added {{count}} keyword(s) to **{{name}}**.',
+			removeKeywordReply: '✅ Removed {{count}} keyword(s) from **{{name}}**.',
+			toggleEnabledReply: '✅ Enabled rule **{{name}}**.',
+			toggleDisabledReply: '✅ Disabled rule **{{name}}**.',
 			ruleNotFoundReply: '❌ No keyword rule named **{{name}}** was found.',
+			ruleNotFoundAnyReply: '❌ No rule named **{{name}}** was found.',
 			status: {
 				enabled: 'Enabled',
 				disabled: 'Disabled'

@@ -145,16 +145,146 @@ export class AutomodService {
     return { rule: updatedRule, addedCount };
   }
 
+  public async removeKeywordsFromRule(
+    guild: Guild,
+    ruleName: string,
+    keywordsToRemove: string[],
+  ): Promise<{ rule: AutoModerationRule; removedCount: number } | null> {
+    const rules = await this.listRules(guild);
+    const rule = rules.find(
+      (candidate) =>
+        candidate.triggerType === AutoModerationRuleTriggerType.Keyword &&
+        candidate.name.toLowerCase() === ruleName.toLowerCase(),
+    );
+    if (!rule) return null;
+
+    const toRemove = new Set(keywordsToRemove.map((keyword) => keyword.toLowerCase()));
+    const existingKeywords = rule.triggerMetadata.keywordFilter ?? [];
+    const remaining = existingKeywords.filter((keyword) => !toRemove.has(keyword.toLowerCase()));
+    const removedCount = existingKeywords.length - remaining.length;
+
+    const updatedRule = removedCount > 0 ? await rule.setKeywordFilter(remaining) : rule;
+    this.logger.log(`Removed ${removedCount} keyword(s) from AutoMod rule "${rule.name}" (${rule.id}) in ${guild.name}`);
+    return { rule: updatedRule, removedCount };
+  }
+
+  public async toggleRule(guild: Guild, ruleName: string): Promise<AutoModerationRule | null> {
+    const rule = await this.findRuleByName(guild, ruleName);
+    if (!rule) return null;
+
+    const updatedRule = await rule.edit({ enabled: !rule.enabled });
+    this.logger.log(
+      `${updatedRule.enabled ? "Enabled" : "Disabled"} AutoMod rule "${rule.name}" (${rule.id}) in ${guild.name}`,
+    );
+    return updatedRule;
+  }
+
+  public async findRuleByName(guild: Guild, ruleName: string): Promise<AutoModerationRule | null> {
+    const rules = await this.listRules(guild);
+    return rules.find((candidate) => candidate.name.toLowerCase() === ruleName.toLowerCase()) ?? null;
+  }
+
+  public buildRuleDetailEmbed(rule: AutoModerationRule, t: TranslationFn): EmbedBuilder {
+    const embed = new EmbedBuilder()
+      .setColor(null)
+      .setTitle(rule.name)
+      .addFields(
+        { name: t(TranslationKey.AutomodViewTriggerField), value: this.getTriggerLabel(rule.triggerType, t), inline: true },
+        {
+          name: t(TranslationKey.AutomodViewStatusField),
+          value: rule.enabled ? t(TranslationKey.AutomodStatusEnabled) : t(TranslationKey.AutomodStatusDisabled),
+          inline: true,
+        },
+      );
+
+    if (rule.triggerType === AutoModerationRuleTriggerType.Keyword) {
+      const keywords = rule.triggerMetadata.keywordFilter ?? [];
+      embed.addFields({
+        name: t(TranslationKey.AutomodViewKeywordsField),
+        value: keywords.length > 0 ? this.truncate(keywords.join(", "), 1024) : t(TranslationKey.AutomodViewNoneValue),
+      });
+    }
+
+    if (rule.triggerType === AutoModerationRuleTriggerType.KeywordPreset) {
+      const presets = rule.triggerMetadata.presets ?? [];
+      embed.addFields({
+        name: t(TranslationKey.AutomodViewPresetsField),
+        value:
+          presets.length > 0
+            ? presets.map((preset) => t(this.getPresetLabelKey(preset))).join(", ")
+            : t(TranslationKey.AutomodViewNoneValue),
+      });
+    }
+
+    if (rule.triggerType === AutoModerationRuleTriggerType.MentionSpam) {
+      embed.addFields(
+        {
+          name: t(TranslationKey.AutomodViewMentionLimitField),
+          value: String(rule.triggerMetadata.mentionTotalLimit ?? t(TranslationKey.AutomodViewNoneValue)),
+          inline: true,
+        },
+        {
+          name: t(TranslationKey.AutomodViewRaidProtectionField),
+          value: rule.triggerMetadata.mentionRaidProtectionEnabled
+            ? t(TranslationKey.AutomodStatusEnabled)
+            : t(TranslationKey.AutomodStatusDisabled),
+          inline: true,
+        },
+      );
+    }
+
+    const alertChannelId = rule.actions.find((action) => action.type === AutoModerationActionType.SendAlertMessage)
+      ?.metadata.channelId;
+    const timeoutSeconds = rule.actions.find((action) => action.type === AutoModerationActionType.Timeout)?.metadata
+      .durationSeconds;
+
+    embed.addFields({
+      name: t(TranslationKey.AutomodViewAlertChannelField),
+      value: alertChannelId ? `<#${alertChannelId}>` : t(TranslationKey.AutomodViewNoneValue),
+      inline: true,
+    });
+
+    if (timeoutSeconds) {
+      embed.addFields({
+        name: t(TranslationKey.AutomodViewTimeoutField),
+        value: t(TranslationKey.AutomodTimeoutMinutesValue, { minutes: String(timeoutSeconds / 60) }),
+        inline: true,
+      });
+    }
+
+    return embed;
+  }
+
+  private truncate(text: string, maxLength: number): string {
+    return text.length > maxLength ? `${text.slice(0, maxLength - 1)}…` : text;
+  }
+
+  private getPresetLabelKey(preset: AutoModerationRuleKeywordPresetType): TranslationKey {
+    const labelKeyByPreset: Record<AutoModerationRuleKeywordPresetType, TranslationKey> = {
+      [AutoModerationRuleKeywordPresetType.Profanity]: TranslationKey.AutomodPresetLabelProfanity,
+      [AutoModerationRuleKeywordPresetType.SexualContent]: TranslationKey.AutomodPresetLabelSexualContent,
+      [AutoModerationRuleKeywordPresetType.Slurs]: TranslationKey.AutomodPresetLabelSlurs,
+    };
+
+    return labelKeyByPreset[preset];
+  }
+
   public async listRules(guild: Guild): Promise<AutoModerationRule[]> {
     const rules = await guild.autoModerationRules.fetch();
     return [...rules.values()];
   }
 
-  public async deleteRules(guild: Guild, ruleIds: string[]): Promise<number> {
-    const results = await Promise.allSettled(ruleIds.map((id) => guild.autoModerationRules.delete(id)));
-    const deletedCount = results.filter((result) => result.status === "fulfilled").length;
-    this.logger.log(`Deleted ${deletedCount}/${ruleIds.length} AutoMod rule(s) in ${guild.name}`);
-    return deletedCount;
+  public async deleteRules(guild: Guild, ruleIds: string[]): Promise<AutoModerationRule[]> {
+    const rules = await this.listRules(guild);
+    const rulesToDelete = rules.filter((rule) => ruleIds.includes(rule.id));
+
+    const results = await Promise.allSettled(
+      rulesToDelete.map((rule) => guild.autoModerationRules.delete(rule.id)),
+    );
+    const deletedRules = rulesToDelete.filter((_, i) => results[i].status === "fulfilled");
+
+    this.logger.log(`Deleted ${deletedRules.length}/${ruleIds.length} AutoMod rule(s) in ${guild.name}`);
+    return deletedRules;
   }
 
   private logCreated(guild: Guild, rule: AutoModerationRule): void {

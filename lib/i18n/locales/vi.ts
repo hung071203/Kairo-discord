@@ -259,6 +259,131 @@ export default {
 			selectPlaceholder: 'Chọn một hoặc nhiều cảnh cáo cần xóa',
 			reply: '🗑️ Đã xóa {{count}} cảnh cáo.'
 		},
+		role: {
+			name: 'role',
+			description: 'Gán hoặc gỡ role của một thành viên',
+			add: {
+				name: 'add',
+				description: 'Gán role cho một thành viên',
+				options: {
+					member: {
+						name: 'member',
+						description: 'Thành viên cần gán role'
+					},
+					role: {
+						name: 'role',
+						description: 'Role cần gán'
+					},
+					reason: {
+						name: 'reason',
+						description: 'Lý do gán role này'
+					}
+				},
+				reply: '✅ Đã gán {{role}} cho {{target}}.'
+			},
+			remove: {
+				name: 'remove',
+				description: 'Gỡ role của một thành viên',
+				options: {
+					member: {
+						name: 'member',
+						description: 'Thành viên cần gỡ role'
+					},
+					role: {
+						name: 'role',
+						description: 'Role cần gỡ'
+					},
+					reason: {
+						name: 'reason',
+						description: 'Lý do gỡ role này'
+					}
+				},
+				reply: '✅ Đã gỡ {{role}} của {{target}}.'
+			}
+		},
+		lock: {
+			name: 'lock',
+			description: 'Khóa channel, chặn @everyone gửi tin nhắn',
+			options: {
+				channel: {
+					name: 'channel',
+					description: 'Channel cần khóa (mặc định là channel hiện tại)'
+				},
+				reason: {
+					name: 'reason',
+					description: 'Lý do khóa channel này'
+				}
+			},
+			reply: '🔒 Đã khóa {{channel}}.'
+		},
+		unlock: {
+			name: 'unlock',
+			description: 'Mở khóa channel, cho @everyone gửi tin nhắn lại',
+			options: {
+				channel: {
+					name: 'channel',
+					description: 'Channel cần mở khóa (mặc định là channel hiện tại)'
+				},
+				reason: {
+					name: 'reason',
+					description: 'Lý do mở khóa channel này'
+				}
+			},
+			reply: '🔓 Đã mở khóa {{channel}}.'
+		},
+		modlog: {
+			name: 'modlog',
+			description: 'Cấu hình và xem lịch sử hành động moderation',
+			setChannel: {
+				name: 'set-channel',
+				description: 'Đặt channel nhận log của mọi hành động moderation',
+				options: {
+					channel: {
+						name: 'channel',
+						description: 'Channel nhận log của mọi hành động moderation'
+					}
+				}
+			},
+			setChannelReply: '✅ Các hành động moderation sẽ được log vào {{channel}}.',
+			list: {
+				name: 'list',
+				description: 'Xem lịch sử hành động moderation của server',
+				options: {
+					member: {
+						name: 'member',
+						description: 'Chỉ hiện hành động nhắm vào thành viên này (không bắt buộc)'
+					}
+				}
+			},
+			listTitle: 'Lịch sử hành động moderation',
+			listEmpty: 'Chưa có hành động moderation nào được ghi lại.',
+			entryName: '{{index}}. {{action}} — {{date}}',
+			entryValue: 'Đối tượng: {{target}} · Bởi: {{moderator}}\n> {{reason}}',
+			fields: {
+				target: 'Đối tượng',
+				moderator: 'Người thực hiện',
+				reason: 'Lý do',
+				detail: 'Chi tiết'
+			},
+			detail: {
+				durationMinutes: '{{duration}} phút'
+			},
+			actions: {
+				kick: 'Kick',
+				ban: 'Ban',
+				unban: 'Unban',
+				mute: 'Mute',
+				roleAdd: 'Gán role',
+				roleRemove: 'Gỡ role',
+				channelLock: 'Khóa channel',
+				channelUnlock: 'Mở khóa channel',
+				automodRuleCreate: 'Tạo rule AutoMod',
+				automodRuleDelete: 'Xóa rule AutoMod',
+				automodRuleToggle: 'Bật/tắt rule AutoMod',
+				automodRuleKeywordAdd: 'Thêm từ khóa AutoMod',
+				automodRuleKeywordRemove: 'Xóa từ khóa AutoMod'
+			}
+		},
 		automodRule: {
 			name: 'automod-rule',
 			description: 'Quản lý các rule AutoMod của server',
@@ -358,6 +483,57 @@ export default {
 					}
 				}
 			},
+			removeKeyword: {
+				name: 'remove-keyword',
+				description: 'Xóa từ khóa khỏi rule keyword đã có',
+				options: {
+					ruleName: {
+						name: 'rule_name',
+						description: 'Tên rule keyword đã có để xóa từ khóa'
+					},
+					keywords: {
+						name: 'keywords',
+						description: 'Các từ khóa cần xóa, ngăn cách bởi dấu phẩy'
+					}
+				}
+			},
+			toggle: {
+				name: 'toggle',
+				description: 'Bật hoặc tắt một rule',
+				options: {
+					ruleName: {
+						name: 'rule_name',
+						description: 'Tên rule cần bật/tắt'
+					}
+				}
+			},
+			view: {
+				name: 'view',
+				description: 'Xem chi tiết đầy đủ của một rule',
+				options: {
+					ruleName: {
+						name: 'rule_name',
+						description: 'Tên rule cần xem'
+					}
+				},
+				fields: {
+					trigger: 'Loại trigger',
+					status: 'Trạng thái',
+					keywords: 'Từ khóa',
+					presets: 'Danh sách từ có sẵn',
+					mentionLimit: 'Giới hạn mention',
+					raidProtection: 'Chống raid',
+					alertChannel: 'Channel cảnh báo',
+					timeout: 'Timeout'
+				},
+				noneValue: 'Không có'
+			},
+			timeoutMinutesValue: '{{minutes}} phút',
+			presetLabels: {
+				profanity: 'Chửi bậy/tục tĩu',
+				sexualContent: 'Nội dung khiêu dâm',
+				slurs: 'Từ phân biệt/xúc phạm'
+			},
 			createdReply: '✅ Đã tạo rule AutoMod **{{name}}**.',
 			listTitle: 'Danh sách rule AutoMod',
 			listEmpty: 'Server chưa có rule AutoMod nào.',
@@ -366,6 +542,10 @@ export default {
 			deleteSelectPlaceholder: 'Chọn một hoặc nhiều rule cần xóa',
 			deleteReply: '🗑️ Đã xóa {{count}} rule.',
 			addKeywordReply: '✅ Đã thêm {{count}} từ khóa vào **{{name}}**.',
+			removeKeywordReply: '✅ Đã xóa {{count}} từ khóa khỏi **{{name}}**.',
+			toggleEnabledReply: '✅ Đã bật rule **{{name}}**.',
+			toggleDisabledReply: '✅ Đã tắt rule **{{name}}**.',
+			ruleNotFoundAnyReply: '❌ Không tìm thấy rule tên **{{name}}**.',
 			ruleNotFoundReply: '❌ Không tìm thấy rule keyword tên **{{name}}**.',
 			status: {
 				enabled: 'Đang bật',

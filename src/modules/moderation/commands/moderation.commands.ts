@@ -1,8 +1,10 @@
 import { Injectable } from "@nestjs/common";
 import { CurrentTranslate, localizationMapByKey, TranslationFn } from "@necord/localization";
+import { ModActionType } from "@prisma/client";
 import { GuildTextBasedChannel, MessageFlags, PermissionFlagsBits } from "discord.js";
 import { Context, Options, SlashCommand, SlashCommandContext } from "necord";
 import { TranslationKey } from "@lib/common/translationKey.common";
+import { ModLogService } from "@lib/mod-log/mod-log.service";
 import { BanDto } from "../dto/ban.dto";
 import { KickDto } from "../dto/kick.dto";
 import { MuteDto } from "../dto/mute.dto";
@@ -13,7 +15,10 @@ import { ModerationService } from "../services/moderation.service";
 
 @Injectable()
 export class ModerationCommands {
-  constructor(private readonly moderationService: ModerationService) {}
+  constructor(
+    private readonly moderationService: ModerationService,
+    private readonly modLogService: ModLogService,
+  ) {}
 
   @SlashCommand({
     name: "kick",
@@ -29,6 +34,16 @@ export class ModerationCommands {
     @CurrentTranslate() t: TranslationFn,
   ) {
     await this.moderationService.kickMember(member, reason);
+
+    const action = await this.modLogService.record({
+      guildId: interaction.guildId!,
+      actionType: ModActionType.KICK,
+      targetId: member.id,
+      moderatorId: interaction.user.id,
+      reason,
+    });
+    await this.modLogService.logToChannel(interaction.guild!, action, t);
+
     return interaction.reply(
       t(TranslationKey.KickReply, {
         target: member.toString(),
@@ -51,6 +66,16 @@ export class ModerationCommands {
     @CurrentTranslate() t: TranslationFn,
   ) {
     await this.moderationService.banUser(interaction.guild!, user, reason, deleteMessageSeconds);
+
+    const action = await this.modLogService.record({
+      guildId: interaction.guildId!,
+      actionType: ModActionType.BAN,
+      targetId: user.id,
+      moderatorId: interaction.user.id,
+      reason,
+    });
+    await this.modLogService.logToChannel(interaction.guild!, action, t);
+
     return interaction.reply(
       t(TranslationKey.BanReply, {
         target: user.toString(),
@@ -73,6 +98,16 @@ export class ModerationCommands {
     @CurrentTranslate() t: TranslationFn,
   ) {
     await this.moderationService.unbanUser(interaction.guild!, user, reason);
+
+    const action = await this.modLogService.record({
+      guildId: interaction.guildId!,
+      actionType: ModActionType.UNBAN,
+      targetId: user.id,
+      moderatorId: interaction.user.id,
+      reason,
+    });
+    await this.modLogService.logToChannel(interaction.guild!, action, t);
+
     return interaction.reply(
       t(TranslationKey.UnbanReply, {
         target: user.toString(),
@@ -95,6 +130,17 @@ export class ModerationCommands {
     @CurrentTranslate() t: TranslationFn,
   ) {
     await this.moderationService.muteMember(member, duration, reason);
+
+    const action = await this.modLogService.record({
+      guildId: interaction.guildId!,
+      actionType: ModActionType.MUTE,
+      targetId: member.id,
+      moderatorId: interaction.user.id,
+      reason,
+      detail: t(TranslationKey.ModLogDetailDurationMinutes, { duration: String(duration) }),
+    });
+    await this.modLogService.logToChannel(interaction.guild!, action, t);
+
     return interaction.reply(
       t(TranslationKey.MuteReply, {
         target: member.toString(),

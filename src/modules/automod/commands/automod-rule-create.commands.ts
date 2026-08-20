@@ -1,7 +1,10 @@
 import { Injectable } from "@nestjs/common";
 import { CurrentTranslate, localizationMapByKey, TranslationFn } from "@necord/localization";
+import { ModActionType } from "@prisma/client";
+import { Guild } from "discord.js";
 import { Context, Options, SlashCommandContext, Subcommand } from "necord";
 import { TranslationKey } from "@lib/common/translationKey.common";
+import { ModLogService } from "@lib/mod-log/mod-log.service";
 import { AutomodKeywordDto } from "../dto/automod-keyword.dto";
 import { AutomodMemberProfileDto } from "../dto/automod-member-profile.dto";
 import { AutomodMentionSpamDto } from "../dto/automod-mention-spam.dto";
@@ -18,7 +21,10 @@ import { AutomodService } from "../services/automod.service";
   descriptionLocalizations: localizationMapByKey(TranslationKey.AutomodRuleCreateGroupDescription),
 })
 export class AutomodRuleCreateCommands {
-  constructor(private readonly automodService: AutomodService) {}
+  constructor(
+    private readonly automodService: AutomodService,
+    private readonly modLogService: ModLogService,
+  ) {}
 
   @Subcommand({
     name: "keyword",
@@ -37,6 +43,7 @@ export class AutomodRuleCreateCommands {
       alertChannel,
       timeoutMinutes,
     });
+    await this.logCreated(interaction.guild!, rule.name, interaction.user.id, t);
     return interaction.reply(t(TranslationKey.AutomodRuleCreatedReply, { name: rule.name }));
   }
 
@@ -59,6 +66,7 @@ export class AutomodRuleCreateCommands {
       alertChannel,
       timeoutMinutes,
     });
+    await this.logCreated(interaction.guild!, rule.name, interaction.user.id, t);
     return interaction.reply(t(TranslationKey.AutomodRuleCreatedReply, { name: rule.name }));
   }
 
@@ -80,6 +88,7 @@ export class AutomodRuleCreateCommands {
       alertChannel,
       timeoutMinutes,
     });
+    await this.logCreated(interaction.guild!, rule.name, interaction.user.id, t);
     return interaction.reply(t(TranslationKey.AutomodRuleCreatedReply, { name: rule.name }));
   }
 
@@ -95,6 +104,7 @@ export class AutomodRuleCreateCommands {
     @CurrentTranslate() t: TranslationFn,
   ) {
     const rule = await this.automodService.createSpamRule(interaction.guild!, { name, alertChannel });
+    await this.logCreated(interaction.guild!, rule.name, interaction.user.id, t);
     return interaction.reply(t(TranslationKey.AutomodRuleCreatedReply, { name: rule.name }));
   }
 
@@ -114,7 +124,18 @@ export class AutomodRuleCreateCommands {
       keywords: this.splitKeywords(keywords),
       alertChannel,
     });
+    await this.logCreated(interaction.guild!, rule.name, interaction.user.id, t);
     return interaction.reply(t(TranslationKey.AutomodRuleCreatedReply, { name: rule.name }));
+  }
+
+  private async logCreated(guild: Guild, ruleName: string, moderatorId: string, t: TranslationFn): Promise<void> {
+    const action = await this.modLogService.record({
+      guildId: guild.id,
+      actionType: ModActionType.AUTOMOD_RULE_CREATE,
+      targetId: ruleName,
+      moderatorId,
+    });
+    await this.modLogService.logToChannel(guild, action, t);
   }
 
   private splitKeywords(keywords: string): string[] {

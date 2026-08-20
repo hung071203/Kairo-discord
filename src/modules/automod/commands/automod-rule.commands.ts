@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { CurrentTranslate, localizationMapByKey, TranslationFn } from "@necord/localization";
+import { ModActionType } from "@prisma/client";
 import { EmbedBuilder, MessageFlags, PermissionFlagsBits } from "discord.js";
 import {
   Context,
@@ -13,7 +14,11 @@ import {
 } from "necord";
 import { fallbackLocale, localizationAdapter } from "@lib/i18n";
 import { TranslationKey } from "@lib/common/translationKey.common";
+import { ModLogService } from "@lib/mod-log/mod-log.service";
 import { AutomodAddKeywordDto } from "../dto/automod-add-keyword.dto";
+import { AutomodRemoveKeywordDto } from "../dto/automod-remove-keyword.dto";
+import { AutomodToggleDto } from "../dto/automod-toggle.dto";
+import { AutomodViewDto } from "../dto/automod-view.dto";
 import { AutomodService } from "../services/automod.service";
 
 export const AutomodRuleGroup = createCommandGroupDecorator({
@@ -28,7 +33,10 @@ export const AutomodRuleGroup = createCommandGroupDecorator({
 @Injectable()
 @AutomodRuleGroup()
 export class AutomodRuleCommands {
-  constructor(private readonly automodService: AutomodService) {}
+  constructor(
+    private readonly automodService: AutomodService,
+    private readonly modLogService: ModLogService,
+  ) {}
 
   @Subcommand({
     name: "list",
@@ -89,9 +97,113 @@ export class AutomodRuleCommands {
       });
     }
 
+    const action = await this.modLogService.record({
+      guildId: interaction.guildId!,
+      actionType: ModActionType.AUTOMOD_RULE_KEYWORD_ADD,
+      targetId: result.rule.name,
+      moderatorId: interaction.user.id,
+      detail: newKeywords.join(", "),
+    });
+    await this.modLogService.logToChannel(interaction.guild!, action, t);
+
     return interaction.reply(
       t(TranslationKey.AutomodAddKeywordReply, { count: String(result.addedCount), name: result.rule.name }),
     );
+  }
+
+  @Subcommand({
+    name: "remove-keyword",
+    description: "Remove keywords from an existing keyword rule",
+    nameLocalizations: localizationMapByKey(TranslationKey.AutomodRemoveKeywordSubName),
+    descriptionLocalizations: localizationMapByKey(TranslationKey.AutomodRemoveKeywordSubDescription),
+  })
+  public async removeKeyword(
+    @Context() [interaction]: SlashCommandContext,
+    @Options() { ruleName, keywords }: AutomodRemoveKeywordDto,
+    @CurrentTranslate() t: TranslationFn,
+  ) {
+    const keywordsToRemove = this.splitKeywords(keywords);
+    const result = await this.automodService.removeKeywordsFromRule(interaction.guild!, ruleName, keywordsToRemove);
+
+    if (!result) {
+      return interaction.reply({
+        content: t(TranslationKey.AutomodRuleNotFoundReply, { name: ruleName }),
+        flags: MessageFlags.Ephemeral,
+      });
+    }
+
+    const action = await this.modLogService.record({
+      guildId: interaction.guildId!,
+      actionType: ModActionType.AUTOMOD_RULE_KEYWORD_REMOVE,
+      targetId: result.rule.name,
+      moderatorId: interaction.user.id,
+      detail: keywordsToRemove.join(", "),
+    });
+    await this.modLogService.logToChannel(interaction.guild!, action, t);
+
+    return interaction.reply(
+      t(TranslationKey.AutomodRemoveKeywordReply, { count: String(result.removedCount), name: result.rule.name }),
+    );
+  }
+
+  @Subcommand({
+    name: "toggle",
+    description: "Enable or disable a rule",
+    nameLocalizations: localizationMapByKey(TranslationKey.AutomodToggleSubName),
+    descriptionLocalizations: localizationMapByKey(TranslationKey.AutomodToggleSubDescription),
+  })
+  public async toggle(
+    @Context() [interaction]: SlashCommandContext,
+    @Options() { ruleName }: AutomodToggleDto,
+    @CurrentTranslate() t: TranslationFn,
+  ) {
+    const rule = await this.automodService.toggleRule(interaction.guild!, ruleName);
+
+    if (!rule) {
+      return interaction.reply({
+        content: t(TranslationKey.AutomodRuleNotFoundAnyReply, { name: ruleName }),
+        flags: MessageFlags.Ephemeral,
+      });
+    }
+
+    const action = await this.modLogService.record({
+      guildId: interaction.guildId!,
+      actionType: ModActionType.AUTOMOD_RULE_TOGGLE,
+      targetId: rule.name,
+      moderatorId: interaction.user.id,
+      detail: rule.enabled ? t(TranslationKey.AutomodStatusEnabled) : t(TranslationKey.AutomodStatusDisabled),
+    });
+    await this.modLogService.logToChannel(interaction.guild!, action, t);
+
+    return interaction.reply(
+      t(rule.enabled ? TranslationKey.AutomodToggleEnabledReply : TranslationKey.AutomodToggleDisabledReply, {
+        name: rule.name,
+      }),
+    );
+  }
+
+  @Subcommand({
+    name: "view",
+    description: "View the full details of a rule",
+    nameLocalizations: localizationMapByKey(TranslationKey.AutomodViewSubName),
+    descriptionLocalizations: localizationMapByKey(TranslationKey.AutomodViewSubDescription),
+  })
+  public async view(
+    @Context() [interaction]: SlashCommandContext,
+    @Options() { ruleName }: AutomodViewDto,
+    @CurrentTranslate() t: TranslationFn,
+  ) {
+    const rule = await this.automodService.findRuleByName(interaction.guild!, ruleName);
+
+    if (!rule) {
+      return interaction.reply({
+        content: t(TranslationKey.AutomodRuleNotFoundAnyReply, { name: ruleName }),
+        flags: MessageFlags.Ephemeral,
+      });
+    }
+
+    const embed = this.automodService.buildRuleDetailEmbed(rule, t);
+    return interaction.reply({ embeds: [embed] });
   }
 
   @StringSelect("automod-rule/delete-select")
@@ -109,9 +221,20 @@ export class AutomodRuleCommands {
       });
     }
 
-    const deletedCount = await this.automodService.deleteRules(interaction.guild!, ruleIds);
+    const deletedRules = await this.automodService.deleteRules(interaction.guild!, ruleIds);
+
+    for (const rule of deletedRules) {
+      const action = await this.modLogService.record({
+        guildId: interaction.guildId!,
+        actionType: ModActionType.AUTOMOD_RULE_DELETE,
+        targetId: rule.name,
+        moderatorId: interaction.user.id,
+      });
+      await this.modLogService.logToChannel(interaction.guild!, action, t);
+    }
+
     return interaction.reply({
-      content: t(TranslationKey.AutomodRuleDeleteReply, { count: String(deletedCount) }),
+      content: t(TranslationKey.AutomodRuleDeleteReply, { count: String(deletedRules.length) }),
       flags: MessageFlags.Ephemeral,
     });
   }

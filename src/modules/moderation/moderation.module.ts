@@ -1,10 +1,21 @@
 import { Module } from "@nestjs/common";
+import { ChannelLockCommands } from "./commands/channel-lock.commands";
+import { ModLogCommands } from "./commands/mod-log.commands";
 import { ModerationCommands } from "./commands/moderation.commands";
-import { ModerationService } from "./services/moderation.service";
+import { RoleCommands } from "./commands/role.commands";
 import { WarnCommands } from "./commands/warn.commands";
+import { ModerationService } from "./services/moderation.service";
 import { WarnService } from "./services/warn.service";
 
 @Module({
-  providers: [ModerationCommands, ModerationService, WarnCommands, WarnService],
+  providers: [
+    ModerationCommands,
+    ModerationService,
+    WarnCommands,
+    WarnService,
+    RoleCommands,
+    ChannelLockCommands,
+    ModLogCommands,
+  ],
 })
 export class ModerationModule {}

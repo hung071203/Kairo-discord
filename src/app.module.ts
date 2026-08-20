@@ -8,6 +8,7 @@ import { localizationAdapter } from "@lib/i18n";
 import { DiscordExceptionFilter } from "@lib/filters/discord-exception.filter";
 import { NecordLoggingInterceptor } from "@lib/interceptors/necord-logging.interceptor";
 import { DatabaseModule } from "@lib/database/database.module";
+import { ModLogModule } from "@lib/mod-log/mod-log.module";
 import { PaginationModule } from "@lib/pagination/pagination.module";
 import { AutomodModule } from "./modules/automod/automod.module";
 import { MediaModule } from "./modules/media/media.module";
@@ -48,6 +49,7 @@ import { UtilityModule } from "./modules/utility/utility.module";
       adapter: localizationAdapter,
     }),
     DatabaseModule,
+    ModLogModule,
     PaginationModule,
     UtilityModule,
     ModerationModule,

@@ -13,7 +13,50 @@ model Warning {
   moderatorId String
   reason      String
   createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@index([guildId, userId])
   @@map("warnings")
+}
+
+enum ModActionType {
+  KICK
+  BAN
+  UNBAN
+  MUTE
+  ROLE_ADD
+  ROLE_REMOVE
+  CHANNEL_LOCK
+  CHANNEL_UNLOCK
+  AUTOMOD_RULE_CREATE
+  AUTOMOD_RULE_DELETE
+  AUTOMOD_RULE_TOGGLE
+  AUTOMOD_RULE_KEYWORD_ADD
+  AUTOMOD_RULE_KEYWORD_REMOVE
+}
+
+model ModAction {
+  id          String        @id @default(cuid())
+  guildId     String
+  actionType  ModActionType
+  targetId    String
+  moderatorId String
+  reason      String?
+  detail      String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([guildId, targetId])
+  @@index([guildId, createdAt])
+  @@map("mod_actions")
+}
+
+model GuildConfig {
+  id              String   @id @default(cuid())
+  guildId         String   @unique
+  modLogChannelId String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("guild_configs")
 }

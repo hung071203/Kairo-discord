@@ -381,7 +381,9 @@ export default {
 				automodRuleDelete: 'AutoMod rule deleted',
 				automodRuleToggle: 'AutoMod rule toggled',
 				automodRuleKeywordAdd: 'AutoMod keyword added',
-				automodRuleKeywordRemove: 'AutoMod keyword removed'
+				automodRuleKeywordRemove: 'AutoMod keyword removed',
+				automodRuleExemptAdd: 'AutoMod exemption added',
+				automodRuleExemptRemove: 'AutoMod exemption removed'
 			}
 		},
 		automodRule: {
@@ -507,6 +509,42 @@ export default {
 					}
 				}
 			},
+			exemptAdd: {
+				name: 'exempt-add',
+				description: 'Exempt a role or channel from a rule',
+				options: {
+					ruleName: {
+						name: 'rule_name',
+						description: 'Name of the rule to add an exemption to'
+					},
+					role: {
+						name: 'role',
+						description: 'Role to exempt from this rule (optional)'
+					},
+					channel: {
+						name: 'channel',
+						description: 'Channel to exempt from this rule (optional)'
+					}
+				}
+			},
+			exemptRemove: {
+				name: 'exempt-remove',
+				description: 'Remove an exemption from a rule',
+				options: {
+					ruleName: {
+						name: 'rule_name',
+						description: 'Name of the rule to remove an exemption from'
+					},
+					role: {
+						name: 'role',
+						description: 'Exempt role to remove from this rule (optional)'
+					},
+					channel: {
+						name: 'channel',
+						description: 'Exempt channel to remove from this rule (optional)'
+					}
+				}
+			},
 			view: {
 				name: 'view',
 				description: 'View the full details of a rule',
@@ -524,7 +562,9 @@ export default {
 					mentionLimit: 'Mention limit',
 					raidProtection: 'Raid protection',
 					alertChannel: 'Alert channel',
-					timeout: 'Timeout'
+					timeout: 'Timeout',
+					exemptRoles: 'Exempt roles',
+					exemptChannels: 'Exempt channels'
 				},
 				noneValue: 'None'
 			},
@@ -545,6 +585,9 @@ export default {
 			removeKeywordReply: '✅ Removed {{count}} keyword(s) from **{{name}}**.',
 			toggleEnabledReply: '✅ Enabled rule **{{name}}**.',
 			toggleDisabledReply: '✅ Disabled rule **{{name}}**.',
+			exemptAddReply: '✅ Exempted {{target}} from **{{name}}**.',
+			exemptRemoveReply: '✅ Removed exemption for {{target}} from **{{name}}**.',
+			exemptMissingTargetReply: '❌ Provide at least a role or a channel.',
 			ruleNotFoundReply: '❌ No keyword rule named **{{name}}** was found.',
 			ruleNotFoundAnyReply: '❌ No rule named **{{name}}** was found.',
 			status: {

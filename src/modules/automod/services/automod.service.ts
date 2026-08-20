@@ -10,7 +10,9 @@ import {
   AutoModerationRuleTriggerType,
   EmbedBuilder,
   Guild,
+  GuildBasedChannel,
   NewsChannel,
+  Role,
   StringSelectMenuBuilder,
   StringSelectMenuOptionBuilder,
   TextChannel,
@@ -179,6 +181,50 @@ export class AutomodService {
     return updatedRule;
   }
 
+  public async addExemption(
+    guild: Guild,
+    ruleName: string,
+    exemption: { role?: Role; channel?: GuildBasedChannel },
+  ): Promise<AutoModerationRule | null> {
+    const rule = await this.findRuleByName(guild, ruleName);
+    if (!rule) return null;
+
+    const exemptRoles = new Map(rule.exemptRoles);
+    if (exemption.role) exemptRoles.set(exemption.role.id, exemption.role);
+
+    const exemptChannels = new Map(rule.exemptChannels);
+    if (exemption.channel) exemptChannels.set(exemption.channel.id, exemption.channel);
+
+    const updatedRule = await rule.edit({
+      exemptRoles: [...exemptRoles.values()],
+      exemptChannels: [...exemptChannels.values()],
+    });
+    this.logger.log(`Updated exemptions for AutoMod rule "${rule.name}" (${rule.id}) in ${guild.name}`);
+    return updatedRule;
+  }
+
+  public async removeExemption(
+    guild: Guild,
+    ruleName: string,
+    exemption: { role?: Role; channel?: GuildBasedChannel },
+  ): Promise<AutoModerationRule | null> {
+    const rule = await this.findRuleByName(guild, ruleName);
+    if (!rule) return null;
+
+    const exemptRoles = new Map(rule.exemptRoles);
+    if (exemption.role) exemptRoles.delete(exemption.role.id);
+
+    const exemptChannels = new Map(rule.exemptChannels);
+    if (exemption.channel) exemptChannels.delete(exemption.channel.id);
+
+    const updatedRule = await rule.edit({
+      exemptRoles: [...exemptRoles.values()],
+      exemptChannels: [...exemptChannels.values()],
+    });
+    this.logger.log(`Updated exemptions for AutoMod rule "${rule.name}" (${rule.id}) in ${guild.name}`);
+    return updatedRule;
+  }
+
   public async findRuleByName(guild: Guild, ruleName: string): Promise<AutoModerationRule | null> {
     const rules = await this.listRules(guild);
     return rules.find((candidate) => candidate.name.toLowerCase() === ruleName.toLowerCase()) ?? null;
@@ -251,6 +297,26 @@ export class AutomodService {
         inline: true,
       });
     }
+
+    const exemptRoles = [...rule.exemptRoles.keys()];
+    const exemptChannels = [...rule.exemptChannels.keys()];
+
+    embed.addFields(
+      {
+        name: t(TranslationKey.AutomodViewExemptRolesField),
+        value:
+          exemptRoles.length > 0
+            ? this.truncate(exemptRoles.map((id) => `<@&${id}>`).join(", "), 1024)
+            : t(TranslationKey.AutomodViewNoneValue),
+      },
+      {
+        name: t(TranslationKey.AutomodViewExemptChannelsField),
+        value:
+          exemptChannels.length > 0
+            ? this.truncate(exemptChannels.map((id) => `<#${id}>`).join(", "), 1024)
+            : t(TranslationKey.AutomodViewNoneValue),
+      },
+    );
 
     return embed;
   }

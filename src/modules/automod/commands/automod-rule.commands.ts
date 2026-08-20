@@ -16,6 +16,8 @@ import { fallbackLocale, localizationAdapter } from "@lib/i18n";
 import { TranslationKey } from "@lib/common/translationKey.common";
 import { ModLogService } from "@lib/mod-log/mod-log.service";
 import { AutomodAddKeywordDto } from "../dto/automod-add-keyword.dto";
+import { AutomodExemptAddDto } from "../dto/automod-exempt-add.dto";
+import { AutomodExemptRemoveDto } from "../dto/automod-exempt-remove.dto";
 import { AutomodRemoveKeywordDto } from "../dto/automod-remove-keyword.dto";
 import { AutomodToggleDto } from "../dto/automod-toggle.dto";
 import { AutomodViewDto } from "../dto/automod-view.dto";
@@ -180,6 +182,88 @@ export class AutomodRuleCommands {
         name: rule.name,
       }),
     );
+  }
+
+  @Subcommand({
+    name: "exempt-add",
+    description: "Exempt a role or channel from a rule",
+    nameLocalizations: localizationMapByKey(TranslationKey.AutomodExemptAddSubName),
+    descriptionLocalizations: localizationMapByKey(TranslationKey.AutomodExemptAddSubDescription),
+  })
+  public async exemptAdd(
+    @Context() [interaction]: SlashCommandContext,
+    @Options() { ruleName, role, channel }: AutomodExemptAddDto,
+    @CurrentTranslate() t: TranslationFn,
+  ) {
+    if (!role && !channel) {
+      return interaction.reply({
+        content: t(TranslationKey.AutomodExemptMissingTargetReply),
+        flags: MessageFlags.Ephemeral,
+      });
+    }
+
+    const rule = await this.automodService.addExemption(interaction.guild!, ruleName, { role, channel });
+
+    if (!rule) {
+      return interaction.reply({
+        content: t(TranslationKey.AutomodRuleNotFoundAnyReply, { name: ruleName }),
+        flags: MessageFlags.Ephemeral,
+      });
+    }
+
+    const target = [role?.toString(), channel?.toString()].filter(Boolean).join(", ");
+
+    const action = await this.modLogService.record({
+      guildId: interaction.guildId!,
+      actionType: ModActionType.AUTOMOD_RULE_EXEMPT_ADD,
+      targetId: rule.name,
+      moderatorId: interaction.user.id,
+      detail: target,
+    });
+    await this.modLogService.logToChannel(interaction.guild!, action, t);
+
+    return interaction.reply(t(TranslationKey.AutomodExemptAddReply, { target, name: rule.name }));
+  }
+
+  @Subcommand({
+    name: "exempt-remove",
+    description: "Remove an exemption from a rule",
+    nameLocalizations: localizationMapByKey(TranslationKey.AutomodExemptRemoveSubName),
+    descriptionLocalizations: localizationMapByKey(TranslationKey.AutomodExemptRemoveSubDescription),
+  })
+  public async exemptRemove(
+    @Context() [interaction]: SlashCommandContext,
+    @Options() { ruleName, role, channel }: AutomodExemptRemoveDto,
+    @CurrentTranslate() t: TranslationFn,
+  ) {
+    if (!role && !channel) {
+      return interaction.reply({
+        content: t(TranslationKey.AutomodExemptMissingTargetReply),
+        flags: MessageFlags.Ephemeral,
+      });
+    }
+
+    const rule = await this.automodService.removeExemption(interaction.guild!, ruleName, { role, channel });
+
+    if (!rule) {
+      return interaction.reply({
+        content: t(TranslationKey.AutomodRuleNotFoundAnyReply, { name: ruleName }),
+        flags: MessageFlags.Ephemeral,
+      });
+    }
+
+    const target = [role?.toString(), channel?.toString()].filter(Boolean).join(", ");
+
+    const action = await this.modLogService.record({
+      guildId: interaction.guildId!,
+      actionType: ModActionType.AUTOMOD_RULE_EXEMPT_REMOVE,
+      targetId: rule.name,
+      moderatorId: interaction.user.id,
+      detail: target,
+    });
+    await this.modLogService.logToChannel(interaction.guild!, action, t);
+
+    return interaction.reply(t(TranslationKey.AutomodExemptRemoveReply, { target, name: rule.name }));
   }
 
   @Subcommand({

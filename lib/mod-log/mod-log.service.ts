@@ -36,6 +36,8 @@ const TARGET_FORMAT_BY_ACTION: Record<ModActionType, TargetFormat> = {
   [ModActionType.AUTOMOD_RULE_TOGGLE]: TargetFormat.Text,
   [ModActionType.AUTOMOD_RULE_KEYWORD_ADD]: TargetFormat.Text,
   [ModActionType.AUTOMOD_RULE_KEYWORD_REMOVE]: TargetFormat.Text,
+  [ModActionType.AUTOMOD_RULE_EXEMPT_ADD]: TargetFormat.Text,
+  [ModActionType.AUTOMOD_RULE_EXEMPT_REMOVE]: TargetFormat.Text,
 };
 
 const ACTION_LABEL_KEYS: Record<ModActionType, TranslationKey> = {
@@ -52,6 +54,8 @@ const ACTION_LABEL_KEYS: Record<ModActionType, TranslationKey> = {
   [ModActionType.AUTOMOD_RULE_TOGGLE]: TranslationKey.ModLogActionAutomodRuleToggle,
   [ModActionType.AUTOMOD_RULE_KEYWORD_ADD]: TranslationKey.ModLogActionAutomodRuleKeywordAdd,
   [ModActionType.AUTOMOD_RULE_KEYWORD_REMOVE]: TranslationKey.ModLogActionAutomodRuleKeywordRemove,
+  [ModActionType.AUTOMOD_RULE_EXEMPT_ADD]: TranslationKey.ModLogActionAutomodRuleExemptAdd,
+  [ModActionType.AUTOMOD_RULE_EXEMPT_REMOVE]: TranslationKey.ModLogActionAutomodRuleExemptRemove,
 };
 
 @Injectable()

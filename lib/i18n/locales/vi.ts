@@ -381,7 +381,9 @@ export default {
 				automodRuleDelete: 'Xóa rule AutoMod',
 				automodRuleToggle: 'Bật/tắt rule AutoMod',
 				automodRuleKeywordAdd: 'Thêm từ khóa AutoMod',
-				automodRuleKeywordRemove: 'Xóa từ khóa AutoMod'
+				automodRuleKeywordRemove: 'Xóa từ khóa AutoMod',
+				automodRuleExemptAdd: 'Thêm miễn trừ AutoMod',
+				automodRuleExemptRemove: 'Gỡ miễn trừ AutoMod'
 			}
 		},
 		automodRule: {
@@ -507,6 +509,42 @@ export default {
 					}
 				}
 			},
+			exemptAdd: {
+				name: 'exempt-add',
+				description: 'Miễn trừ role hoặc channel khỏi một rule',
+				options: {
+					ruleName: {
+						name: 'rule_name',
+						description: 'Tên rule cần thêm miễn trừ'
+					},
+					role: {
+						name: 'role',
+						description: 'Role cần miễn trừ khỏi rule này (không bắt buộc)'
+					},
+					channel: {
+						name: 'channel',
+						description: 'Channel cần miễn trừ khỏi rule này (không bắt buộc)'
+					}
+				}
+			},
+			exemptRemove: {
+				name: 'exempt-remove',
+				description: 'Gỡ miễn trừ khỏi một rule',
+				options: {
+					ruleName: {
+						name: 'rule_name',
+						description: 'Tên rule cần gỡ miễn trừ'
+					},
+					role: {
+						name: 'role',
+						description: 'Role miễn trừ cần gỡ khỏi rule này (không bắt buộc)'
+					},
+					channel: {
+						name: 'channel',
+						description: 'Channel miễn trừ cần gỡ khỏi rule này (không bắt buộc)'
+					}
+				}
+			},
 			view: {
 				name: 'view',
 				description: 'Xem chi tiết đầy đủ của một rule',
@@ -524,7 +562,9 @@ export default {
 					mentionLimit: 'Giới hạn mention',
 					raidProtection: 'Chống raid',
 					alertChannel: 'Channel cảnh báo',
-					timeout: 'Timeout'
+					timeout: 'Timeout',
+					exemptRoles: 'Role miễn trừ',
+					exemptChannels: 'Channel miễn trừ'
 				},
 				noneValue: 'Không có'
 			},
@@ -545,6 +585,9 @@ export default {
 			removeKeywordReply: '✅ Đã xóa {{count}} từ khóa khỏi **{{name}}**.',
 			toggleEnabledReply: '✅ Đã bật rule **{{name}}**.',
 			toggleDisabledReply: '✅ Đã tắt rule **{{name}}**.',
+			exemptAddReply: '✅ Đã miễn trừ {{target}} khỏi **{{name}}**.',
+			exemptRemoveReply: '✅ Đã gỡ miễn trừ {{target}} khỏi **{{name}}**.',
+			exemptMissingTargetReply: '❌ Cần cung cấp ít nhất 1 role hoặc channel.',
 			ruleNotFoundAnyReply: '❌ Không tìm thấy rule tên **{{name}}**.',
 			ruleNotFoundReply: '❌ Không tìm thấy rule keyword tên **{{name}}**.',
 			status: {

@@ -178,6 +178,20 @@ export enum TranslationKey {
   RoleAddReasonOptionDescription = "commands.role.add.options.reason.description",
   RoleAddReply = "commands.role.add.reply",
 
+  RoleListSubName = "commands.role.list.name",
+  RoleListSubDescription = "commands.role.list.description",
+  RoleListTitle = "commands.role.list.title",
+  RoleListEmpty = "commands.role.list.empty",
+  RoleListEntry = "commands.role.list.entry",
+
+  RoleMoveSubName = "commands.role.move.name",
+  RoleMoveSubDescription = "commands.role.move.description",
+  RoleMoveRoleOptionName = "commands.role.move.options.role.name",
+  RoleMoveRoleOptionDescription = "commands.role.move.options.role.description",
+  RoleMovePositionOptionName = "commands.role.move.options.position.name",
+  RoleMovePositionOptionDescription = "commands.role.move.options.position.description",
+  RoleMoveReply = "commands.role.move.reply",
+
   RoleRemoveSubName = "commands.role.remove.name",
   RoleRemoveSubDescription = "commands.role.remove.description",
   RoleRemoveMemberOptionName = "commands.role.remove.options.member.name",

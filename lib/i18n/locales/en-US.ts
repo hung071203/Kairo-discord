@@ -268,6 +268,28 @@ export default {
 		role: {
 			name: 'role',
 			description: 'Manage server roles',
+			list: {
+				name: 'list',
+				description: 'List all roles in this server',
+				title: 'Roles',
+				empty: 'This server has no roles.',
+				entry: '**{{index}}.** {{role}} · position `{{position}}` · color `{{color}}` · {{count}} member(s)'
+			},
+			move: {
+				name: 'move',
+				description: "Change a role's position in the hierarchy",
+				options: {
+					role: {
+						name: 'role',
+						description: 'The role to move'
+					},
+					position: {
+						name: 'position',
+						description: 'New position for this role (see /role list for current positions)'
+					}
+				},
+				reply: '✅ Moved {{role}} to position {{position}}.'
+			},
 			add: {
 				name: 'add',
 				description: 'Give a role to a member',

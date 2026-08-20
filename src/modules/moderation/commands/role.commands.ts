@@ -7,10 +7,13 @@ import { APP_REGEX } from "@lib/common/app.common";
 import { TranslationKey } from "@lib/common/translationKey.common";
 import { ModLogService } from "@lib/mod-log/mod-log.service";
 import { PendingModActionRegistry } from "@lib/mod-log/pending-mod-action.registry";
+import { PaginatorService } from "@lib/pagination/paginator.service";
 import { RoleAddDto } from "../dto/role-add.dto";
 import { RoleCreateDto } from "../dto/role-create.dto";
 import { RoleDeleteDto } from "../dto/role-delete.dto";
+import { RoleMoveDto } from "../dto/role-move.dto";
 import { RoleRemoveDto } from "../dto/role-remove.dto";
+import { RoleService } from "../services/role.service";
 
 export const RoleGroup = createCommandGroupDecorator({
   name: "role",
@@ -25,9 +28,43 @@ export const RoleGroup = createCommandGroupDecorator({
 @RoleGroup()
 export class RoleCommands {
   constructor(
+    private readonly roleService: RoleService,
+    private readonly paginatorService: PaginatorService,
     private readonly modLogService: ModLogService,
     private readonly pendingModActionRegistry: PendingModActionRegistry,
   ) {}
+
+  @Subcommand({
+    name: "list",
+    description: "List all roles in this server",
+    nameLocalizations: localizationMapByKey(TranslationKey.RoleListSubName),
+    descriptionLocalizations: localizationMapByKey(TranslationKey.RoleListSubDescription),
+  })
+  public async list(
+    @Context() [interaction]: SlashCommandContext,
+    @CurrentTranslate() t: TranslationFn,
+  ) {
+    const pages = this.roleService.buildRoleListPages(interaction.guild!, t);
+    const payload = this.paginatorService.createPaginator(interaction.user.id, pages);
+    return interaction.reply(payload);
+  }
+
+  @Subcommand({
+    name: "move",
+    description: "Change a role's position in the hierarchy",
+    nameLocalizations: localizationMapByKey(TranslationKey.RoleMoveSubName),
+    descriptionLocalizations: localizationMapByKey(TranslationKey.RoleMoveSubDescription),
+  })
+  public async move(
+    @Context() [interaction]: SlashCommandContext,
+    @Options() { role, position }: RoleMoveDto,
+    @CurrentTranslate() t: TranslationFn,
+  ) {
+    const updatedRole = await role.setPosition(position);
+    return interaction.reply(
+      t(TranslationKey.RoleMoveReply, { role: updatedRole.toString(), position: String(updatedRole.position) }),
+    );
+  }
 
   @Subcommand({
     name: "add",

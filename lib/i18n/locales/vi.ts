@@ -268,6 +268,28 @@ export default {
 		role: {
 			name: 'role',
 			description: 'Quản lý role của server',
+			list: {
+				name: 'list',
+				description: 'Xem danh sách role của server',
+				title: 'Danh sách role',
+				empty: 'Server chưa có role nào.',
+				entry: '**{{index}}.** {{role}} · vị trí `{{position}}` · màu `{{color}}` · {{count}} thành viên'
+			},
+			move: {
+				name: 'move',
+				description: 'Đổi vị trí (thứ hạng) của một role',
+				options: {
+					role: {
+						name: 'role',
+						description: 'Role cần đổi vị trí'
+					},
+					position: {
+						name: 'position',
+						description: 'Vị trí mới cho role (xem /role list để biết vị trí hiện tại)'
+					}
+				},
+				reply: '✅ Đã chuyển {{role}} sang vị trí {{position}}.'
+			},
 			add: {
 				name: 'add',
 				description: 'Gán role cho một thành viên',

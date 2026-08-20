@@ -6,6 +6,7 @@ import { RoleCommands } from "./commands/role.commands";
 import { WarnCommands } from "./commands/warn.commands";
 import { RoleConfigListener } from "./listeners/role-config.listener";
 import { ModerationService } from "./services/moderation.service";
+import { RoleService } from "./services/role.service";
 import { WarnService } from "./services/warn.service";
 
 @Module({
@@ -15,6 +16,7 @@ import { WarnService } from "./services/warn.service";
     WarnCommands,
     WarnService,
     RoleCommands,
+    RoleService,
     RoleConfigListener,
     ChannelLockCommands,
     ModLogCommands,

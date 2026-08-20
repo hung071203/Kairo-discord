@@ -2,13 +2,13 @@ import { Injectable } from "@nestjs/common";
 import { CurrentTranslate, localizationMapByKey, TranslationFn } from "@necord/localization";
 import { Context, Options, SlashCommandContext, Subcommand } from "necord";
 import { TranslationKey } from "@lib/common/translationKey.common";
-import { AutomodKeywordDto } from "./dto/automod-keyword.dto";
-import { AutomodMemberProfileDto } from "./dto/automod-member-profile.dto";
-import { AutomodMentionSpamDto } from "./dto/automod-mention-spam.dto";
-import { AutomodPresetDto } from "./dto/automod-preset.dto";
-import { AutomodSpamDto } from "./dto/automod-spam.dto";
+import { AutomodKeywordDto } from "../dto/automod-keyword.dto";
+import { AutomodMemberProfileDto } from "../dto/automod-member-profile.dto";
+import { AutomodMentionSpamDto } from "../dto/automod-mention-spam.dto";
+import { AutomodPresetDto } from "../dto/automod-preset.dto";
+import { AutomodSpamDto } from "../dto/automod-spam.dto";
 import { AutomodRuleGroup } from "./automod-rule.commands";
-import { AutomodService } from "./services/automod.service";
+import { AutomodService } from "../services/automod.service";
 
 @Injectable()
 @AutomodRuleGroup({

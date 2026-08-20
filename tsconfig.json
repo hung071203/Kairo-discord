@@ -7,7 +7,8 @@
 		"outDir": "dist",
 		"rootDir": ".",
 		"paths": {
-			"@lib/*": ["./lib/*"]
+			"@lib/*": ["./lib/*"],
+			"@src/*": ["./src/*"]
 		},
 		"strict": true,
 		"experimentalDecorators": true,

@@ -4,6 +4,7 @@ import { EmbedBuilder, MessageFlags, PermissionFlagsBits } from "discord.js";
 import {
   Context,
   createCommandGroupDecorator,
+  Options,
   SelectedStrings,
   SlashCommandContext,
   Subcommand,
@@ -12,7 +13,8 @@ import {
 } from "necord";
 import { fallbackLocale, localizationAdapter } from "@lib/i18n";
 import { TranslationKey } from "@lib/common/translationKey.common";
-import { AutomodService } from "./services/automod.service";
+import { AutomodAddKeywordDto } from "../dto/automod-add-keyword.dto";
+import { AutomodService } from "../services/automod.service";
 
 export const AutomodRuleGroup = createCommandGroupDecorator({
   name: "automod-rule",
@@ -66,6 +68,32 @@ export class AutomodRuleCommands {
     return interaction.reply({ embeds: [embed], components: [row], flags: MessageFlags.Ephemeral });
   }
 
+  @Subcommand({
+    name: "add-keyword",
+    description: "Add keywords to an existing keyword rule",
+    nameLocalizations: localizationMapByKey(TranslationKey.AutomodAddKeywordSubName),
+    descriptionLocalizations: localizationMapByKey(TranslationKey.AutomodAddKeywordSubDescription),
+  })
+  public async addKeyword(
+    @Context() [interaction]: SlashCommandContext,
+    @Options() { ruleName, keywords }: AutomodAddKeywordDto,
+    @CurrentTranslate() t: TranslationFn,
+  ) {
+    const newKeywords = this.splitKeywords(keywords);
+    const result = await this.automodService.addKeywordsToRule(interaction.guild!, ruleName, newKeywords);
+
+    if (!result) {
+      return interaction.reply({
+        content: t(TranslationKey.AutomodRuleNotFoundReply, { name: ruleName }),
+        flags: MessageFlags.Ephemeral,
+      });
+    }
+
+    return interaction.reply(
+      t(TranslationKey.AutomodAddKeywordReply, { count: String(result.addedCount), name: result.rule.name }),
+    );
+  }
+
   @StringSelect("automod-rule/delete-select")
   public async onSelectRulesToDelete(
     @Context() [interaction]: StringSelectContext,
@@ -86,5 +114,12 @@ export class AutomodRuleCommands {
       content: t(TranslationKey.AutomodRuleDeleteReply, { count: String(deletedCount) }),
       flags: MessageFlags.Ephemeral,
     });
+  }
+
+  private splitKeywords(keywords: string): string[] {
+    return keywords
+      .split(",")
+      .map((keyword) => keyword.trim())
+      .filter(Boolean);
   }
 }

@@ -344,6 +344,20 @@ export default {
 				name: 'delete',
 				description: 'Xóa một hoặc nhiều rule AutoMod'
 			},
+			addKeyword: {
+				name: 'add-keyword',
+				description: 'Thêm từ khóa vào rule keyword đã có',
+				options: {
+					ruleName: {
+						name: 'rule_name',
+						description: 'Tên rule keyword đã có để thêm vào'
+					},
+					keywords: {
+						name: 'keywords',
+						description: 'Các từ khóa cần thêm, ngăn cách bởi dấu phẩy'
+					}
+				}
+			},
 			createdReply: '✅ Đã tạo rule AutoMod **{{name}}**.',
 			listTitle: 'Danh sách rule AutoMod',
 			listEmpty: 'Server chưa có rule AutoMod nào.',
@@ -351,6 +365,8 @@ export default {
 			deleteTitle: 'Chọn rule cần xóa',
 			deleteSelectPlaceholder: 'Chọn một hoặc nhiều rule cần xóa',
 			deleteReply: '🗑️ Đã xóa {{count}} rule.',
+			addKeywordReply: '✅ Đã thêm {{count}} từ khóa vào **{{name}}**.',
+			ruleNotFoundReply: '❌ Không tìm thấy rule keyword tên **{{name}}**.',
 			status: {
 				enabled: 'Đang bật',
 				disabled: 'Đang tắt'

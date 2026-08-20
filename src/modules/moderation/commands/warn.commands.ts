@@ -14,10 +14,10 @@ import {
 import { fallbackLocale, localizationAdapter } from "@lib/i18n";
 import { TranslationKey } from "@lib/common/translationKey.common";
 import { PaginatorService } from "@lib/pagination/paginator.service";
-import { WarnDto } from "./dto/warn.dto";
-import { WarnRemoveDto } from "./dto/warn-remove.dto";
-import { WarningsDto } from "./dto/warnings.dto";
-import { WarnService } from "./services/warn.service";
+import { WarnDto } from "../dto/warn.dto";
+import { WarnRemoveDto } from "../dto/warn-remove.dto";
+import { WarningsDto } from "../dto/warnings.dto";
+import { WarnService } from "../services/warn.service";
 
 export const WarnGroup = createCommandGroupDecorator({
   name: "warn",

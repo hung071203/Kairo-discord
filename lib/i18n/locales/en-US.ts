@@ -344,6 +344,20 @@ export default {
 				name: 'delete',
 				description: 'Delete one or more AutoMod rules'
 			},
+			addKeyword: {
+				name: 'add-keyword',
+				description: 'Add keywords to an existing keyword rule',
+				options: {
+					ruleName: {
+						name: 'rule_name',
+						description: 'Name of the existing keyword rule to add to'
+					},
+					keywords: {
+						name: 'keywords',
+						description: 'Comma-separated keywords to add to the rule'
+					}
+				}
+			},
 			createdReply: '✅ Created AutoMod rule **{{name}}**.',
 			listTitle: 'AutoMod rules',
 			listEmpty: 'This server has no AutoMod rules yet.',
@@ -351,6 +365,8 @@ export default {
 			deleteTitle: 'Select rules to delete',
 			deleteSelectPlaceholder: 'Select one or more rules to delete',
 			deleteReply: '🗑️ Deleted {{count}} rule(s).',
+			addKeywordReply: '✅ Added {{count}} keyword(s) to **{{name}}**.',
+			ruleNotFoundReply: '❌ No keyword rule named **{{name}}** was found.',
 			status: {
 				enabled: 'Enabled',
 				disabled: 'Disabled'

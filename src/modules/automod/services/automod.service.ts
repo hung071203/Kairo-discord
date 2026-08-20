@@ -115,6 +115,36 @@ export class AutomodService {
     return rule;
   }
 
+  public async addKeywordsToRule(
+    guild: Guild,
+    ruleName: string,
+    newKeywords: string[],
+  ): Promise<{ rule: AutoModerationRule; addedCount: number } | null> {
+    const rules = await this.listRules(guild);
+    const rule = rules.find(
+      (candidate) =>
+        candidate.triggerType === AutoModerationRuleTriggerType.Keyword &&
+        candidate.name.toLowerCase() === ruleName.toLowerCase(),
+    );
+    if (!rule) return null;
+
+    const existingKeywords = rule.triggerMetadata.keywordFilter ?? [];
+    const seen = new Set(existingKeywords.map((keyword) => keyword.toLowerCase()));
+    const merged = [...existingKeywords];
+
+    let addedCount = 0;
+    for (const keyword of newKeywords) {
+      if (seen.has(keyword.toLowerCase())) continue;
+      seen.add(keyword.toLowerCase());
+      merged.push(keyword);
+      addedCount++;
+    }
+
+    const updatedRule = addedCount > 0 ? await rule.setKeywordFilter(merged) : rule;
+    this.logger.log(`Added ${addedCount} keyword(s) to AutoMod rule "${rule.name}" (${rule.id}) in ${guild.name}`);
+    return { rule: updatedRule, addedCount };
+  }
+
   public async listRules(guild: Guild): Promise<AutoModerationRule[]> {
     const rules = await guild.autoModerationRules.fetch();
     return [...rules.values()];

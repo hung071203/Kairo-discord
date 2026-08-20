@@ -3,13 +3,13 @@ import { CurrentTranslate, localizationMapByKey, TranslationFn } from "@necord/l
 import { GuildTextBasedChannel, MessageFlags, PermissionFlagsBits } from "discord.js";
 import { Context, Options, SlashCommand, SlashCommandContext } from "necord";
 import { TranslationKey } from "@lib/common/translationKey.common";
-import { BanDto } from "./dto/ban.dto";
-import { KickDto } from "./dto/kick.dto";
-import { MuteDto } from "./dto/mute.dto";
-import { PurgeDto } from "./dto/purge.dto";
-import { SlowmodeDto } from "./dto/slowmode.dto";
-import { UnbanDto } from "./dto/unban.dto";
-import { ModerationService } from "./services/moderation.service";
+import { BanDto } from "../dto/ban.dto";
+import { KickDto } from "../dto/kick.dto";
+import { MuteDto } from "../dto/mute.dto";
+import { PurgeDto } from "../dto/purge.dto";
+import { SlowmodeDto } from "../dto/slowmode.dto";
+import { UnbanDto } from "../dto/unban.dto";
+import { ModerationService } from "../services/moderation.service";
 
 @Injectable()
 export class ModerationCommands {

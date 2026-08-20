@@ -16,11 +16,11 @@ import {
 } from "discord.js";
 import { Context, Options, SlashCommand, SlashCommandContext } from "necord";
 import { TranslationKey } from "@lib/common/translationKey.common";
-import { AvatarDto } from "./dto/avatar.dto";
-import { ChannelInfoDto } from "./dto/channel-info.dto";
-import { RoleInfoDto } from "./dto/role-info.dto";
-import { UserInfoDto } from "./dto/user-info.dto";
-import { UtilityService } from "./services/utility.service";
+import { AvatarDto } from "../dto/avatar.dto";
+import { ChannelInfoDto } from "../dto/channel-info.dto";
+import { RoleInfoDto } from "../dto/role-info.dto";
+import { UserInfoDto } from "../dto/user-info.dto";
+import { UtilityService } from "../services/utility.service";
 
 @Injectable()
 export class UtilityCommands {

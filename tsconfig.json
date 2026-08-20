@@ -1,23 +1,25 @@
 {
-  "compilerOptions": {
-    "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "lib": ["ES2022"],
-    "outDir": "dist",
-    "rootDir": ".",
-    "strict": true,
-    "noUncheckedIndexedAccess": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "declaration": false,
-    "sourceMap": true,
-    "paths": {
-      "@src/*": ["./src/*"],
-      "@lib/*": ["./lib/*"]
-    }
-  },
-  "include": ["src", "lib"]
+	"compilerOptions": {
+		"target": "ES2022",
+		"module": "CommonJS",
+		"moduleResolution": "bundler",
+		"lib": ["ES2022"],
+		"outDir": "dist",
+		"rootDir": ".",
+		"paths": {
+			"@lib/*": ["./lib/*"],
+			"@src/*": ["./src/*"]
+		},
+		"strict": true,
+		"experimentalDecorators": true,
+		"emitDecoratorMetadata": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true,
+		"resolveJsonModule": true,
+		"declaration": false,
+		"sourceMap": true
+	},
+	"include": ["src/**/*.ts", "lib/**/*.ts", "prisma.config.ts"],
+	"exclude": ["node_modules", "dist"]
 }

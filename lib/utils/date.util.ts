@@ -1,9 +1,12 @@
+import dayjs from "dayjs";
+import { DiscordTimestampStyle } from "@lib/interfaces/discord-timestamp-style.interface";
+
 export class DateUtil {
-  static toUnixSeconds(date: Date): number {
-    return Math.floor(date.getTime() / 1000);
+  public static toDiscordTimestamp(date: Date | number, style: DiscordTimestampStyle = "f"): string {
+    return `<t:${dayjs(date).unix()}:${style}>`;
   }
 
-  static toDiscordRelative(date: Date): string {
-    return `<t:${DateUtil.toUnixSeconds(date)}:R>`;
+  public static toPlainDateTime(date: Date | number): string {
+    return dayjs(date).format("DD/MM/YYYY HH:mm");
   }
 }

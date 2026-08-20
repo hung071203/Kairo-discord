@@ -1,0 +1,14 @@
+diff --git a/dist/necord-localization.module-definition.js b/dist/necord-localization.module-definition.js
+index afbc66e9611661ca964ac85f21a6d3ca48b7cd65..59536c8150bee52d68e493f4b07458dc3c52637b 100644
+--- a/dist/necord-localization.module-definition.js
++++ b/dist/necord-localization.module-definition.js
+@@ -16,8 +16,7 @@ _a = new common_1.ConfigurableModuleBuilder()
+     var _a;
+     const adapterProvider = {
+         provide: providers_1.LOCALIZATION_ADAPTER,
+-        useFactory: (options) => options.adapter,
+-        inject: [exports.MODULE_OPTIONS_TOKEN]
++        useValue: extras.adapter
+     };
+     const resolversProviders = {
+         provide: providers_1.LOCALIZATION_RESOLVERS,

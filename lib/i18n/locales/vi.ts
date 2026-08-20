@@ -383,8 +383,10 @@ export default {
 				automodRuleKeywordAdd: 'Thêm từ khóa AutoMod',
 				automodRuleKeywordRemove: 'Xóa từ khóa AutoMod',
 				automodRuleExemptAdd: 'Thêm miễn trừ AutoMod',
-				automodRuleExemptRemove: 'Gỡ miễn trừ AutoMod'
-			}
+				automodRuleExemptRemove: 'Gỡ miễn trừ AutoMod',
+				automodRuleUpdate: 'Cập nhật rule AutoMod'
+			},
+			unknownModerator: 'Không rõ (sửa trực tiếp trên Discord)'
 		},
 		automodRule: {
 			name: 'automod-rule',

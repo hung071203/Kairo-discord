@@ -28,7 +28,10 @@ interface CommonRuleOptions {
 
 @Injectable()
 export class AutomodService {
+  private static readonly SELF_CHANGE_TTL_MS = 5000;
+
   private readonly logger = new Logger(AutomodService.name);
+  private readonly recentSelfChanges = new Set<string>();
 
   public async createKeywordRule(
     guild: Guild,
@@ -43,6 +46,7 @@ export class AutomodService {
       enabled: true,
     });
     this.logCreated(guild, rule);
+    this.markSelfChange(rule.id);
     return rule;
   }
 
@@ -64,6 +68,7 @@ export class AutomodService {
       enabled: true,
     });
     this.logCreated(guild, rule);
+    this.markSelfChange(rule.id);
     return rule;
   }
 
@@ -83,6 +88,7 @@ export class AutomodService {
       enabled: true,
     });
     this.logCreated(guild, rule);
+    this.markSelfChange(rule.id);
     return rule;
   }
 
@@ -98,6 +104,7 @@ export class AutomodService {
       enabled: true,
     });
     this.logCreated(guild, rule);
+    this.markSelfChange(rule.id);
     return rule;
   }
 
@@ -114,6 +121,7 @@ export class AutomodService {
       enabled: true,
     });
     this.logCreated(guild, rule);
+    this.markSelfChange(rule.id);
     return rule;
   }
 
@@ -144,6 +152,7 @@ export class AutomodService {
 
     const updatedRule = addedCount > 0 ? await rule.setKeywordFilter(merged) : rule;
     this.logger.log(`Added ${addedCount} keyword(s) to AutoMod rule "${rule.name}" (${rule.id}) in ${guild.name}`);
+    this.markSelfChange(updatedRule.id);
     return { rule: updatedRule, addedCount };
   }
 
@@ -167,6 +176,7 @@ export class AutomodService {
 
     const updatedRule = removedCount > 0 ? await rule.setKeywordFilter(remaining) : rule;
     this.logger.log(`Removed ${removedCount} keyword(s) from AutoMod rule "${rule.name}" (${rule.id}) in ${guild.name}`);
+    this.markSelfChange(updatedRule.id);
     return { rule: updatedRule, removedCount };
   }
 
@@ -178,6 +188,7 @@ export class AutomodService {
     this.logger.log(
       `${updatedRule.enabled ? "Enabled" : "Disabled"} AutoMod rule "${rule.name}" (${rule.id}) in ${guild.name}`,
     );
+    this.markSelfChange(updatedRule.id);
     return updatedRule;
   }
 
@@ -200,6 +211,7 @@ export class AutomodService {
       exemptChannels: [...exemptChannels.values()],
     });
     this.logger.log(`Updated exemptions for AutoMod rule "${rule.name}" (${rule.id}) in ${guild.name}`);
+    this.markSelfChange(updatedRule.id);
     return updatedRule;
   }
 
@@ -222,6 +234,7 @@ export class AutomodService {
       exemptChannels: [...exemptChannels.values()],
     });
     this.logger.log(`Updated exemptions for AutoMod rule "${rule.name}" (${rule.id}) in ${guild.name}`);
+    this.markSelfChange(updatedRule.id);
     return updatedRule;
   }
 
@@ -348,6 +361,7 @@ export class AutomodService {
       rulesToDelete.map((rule) => guild.autoModerationRules.delete(rule.id)),
     );
     const deletedRules = rulesToDelete.filter((_, i) => results[i].status === "fulfilled");
+    deletedRules.forEach((rule) => this.markSelfChange(rule.id));
 
     this.logger.log(`Deleted ${deletedRules.length}/${ruleIds.length} AutoMod rule(s) in ${guild.name}`);
     return deletedRules;
@@ -357,6 +371,15 @@ export class AutomodService {
     this.logger.log(
       `Created AutoMod rule "${rule.name}" (${rule.id}) in ${guild.name} — trigger: ${rule.triggerType}`,
     );
+  }
+
+  public markSelfChange(ruleId: string): void {
+    this.recentSelfChanges.add(ruleId);
+    setTimeout(() => this.recentSelfChanges.delete(ruleId), AutomodService.SELF_CHANGE_TTL_MS);
+  }
+
+  public wasRecentlyChangedBySelf(ruleId: string): boolean {
+    return this.recentSelfChanges.has(ruleId);
   }
 
   public buildRulesListEmbed(rules: AutoModerationRule[], t: TranslationFn): EmbedBuilder {

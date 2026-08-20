@@ -383,8 +383,10 @@ export default {
 				automodRuleKeywordAdd: 'AutoMod keyword added',
 				automodRuleKeywordRemove: 'AutoMod keyword removed',
 				automodRuleExemptAdd: 'AutoMod exemption added',
-				automodRuleExemptRemove: 'AutoMod exemption removed'
-			}
+				automodRuleExemptRemove: 'AutoMod exemption removed',
+				automodRuleUpdate: 'AutoMod rule updated'
+			},
+			unknownModerator: 'Unknown (changed directly in Discord)'
 		},
 		automodRule: {
 			name: 'automod-rule',

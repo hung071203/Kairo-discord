@@ -7,6 +7,8 @@ import { PaginatorPage } from "@lib/pagination/paginator.service";
 import { TranslationKey } from "@lib/common/translationKey.common";
 import { DateUtil } from "@lib/utils/date.util";
 
+const UNKNOWN_MODERATOR_ID = "unknown";
+
 interface RecordModActionParams {
   guildId: string;
   actionType: ModActionType;
@@ -38,6 +40,7 @@ const TARGET_FORMAT_BY_ACTION: Record<ModActionType, TargetFormat> = {
   [ModActionType.AUTOMOD_RULE_KEYWORD_REMOVE]: TargetFormat.Text,
   [ModActionType.AUTOMOD_RULE_EXEMPT_ADD]: TargetFormat.Text,
   [ModActionType.AUTOMOD_RULE_EXEMPT_REMOVE]: TargetFormat.Text,
+  [ModActionType.AUTOMOD_RULE_UPDATE]: TargetFormat.Text,
 };
 
 const ACTION_LABEL_KEYS: Record<ModActionType, TranslationKey> = {
@@ -56,6 +59,7 @@ const ACTION_LABEL_KEYS: Record<ModActionType, TranslationKey> = {
   [ModActionType.AUTOMOD_RULE_KEYWORD_REMOVE]: TranslationKey.ModLogActionAutomodRuleKeywordRemove,
   [ModActionType.AUTOMOD_RULE_EXEMPT_ADD]: TranslationKey.ModLogActionAutomodRuleExemptAdd,
   [ModActionType.AUTOMOD_RULE_EXEMPT_REMOVE]: TranslationKey.ModLogActionAutomodRuleExemptRemove,
+  [ModActionType.AUTOMOD_RULE_UPDATE]: TranslationKey.ModLogActionAutomodRuleUpdate,
 };
 
 @Injectable()
@@ -99,7 +103,11 @@ export class ModLogService {
       .setTitle(t(this.getActionLabelKey(action.actionType)))
       .addFields(
         { name: t(TranslationKey.ModLogFieldTarget), value: this.formatTarget(action), inline: true },
-        { name: t(TranslationKey.ModLogFieldModerator), value: `<@${action.moderatorId}>`, inline: true },
+        {
+          name: t(TranslationKey.ModLogFieldModerator),
+          value: this.formatModerator(action.moderatorId, t),
+          inline: true,
+        },
         {
           name: t(TranslationKey.ModLogFieldReason),
           value: action.reason ?? t(TranslationKey.ModerationNoReasonProvided),
@@ -145,12 +153,16 @@ export class ModLogService {
             }),
             value: t(TranslationKey.ModLogEntryValue, {
               target: this.formatTarget(action),
-              moderator: `<@${action.moderatorId}>`,
+              moderator: this.formatModerator(action.moderatorId, t),
               reason: action.reason ?? t(TranslationKey.ModerationNoReasonProvided),
             }),
           })),
         ),
     }));
+  }
+
+  private formatModerator(moderatorId: string, t: TranslationFn): string {
+    return moderatorId === UNKNOWN_MODERATOR_ID ? t(TranslationKey.ModLogUnknownModerator) : `<@${moderatorId}>`;
   }
 
   private formatTarget(action: ModAction): string {

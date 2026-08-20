@@ -235,6 +235,8 @@ export enum TranslationKey {
   ModLogActionAutomodRuleKeywordRemove = "commands.modlog.actions.automodRuleKeywordRemove",
   ModLogActionAutomodRuleExemptAdd = "commands.modlog.actions.automodRuleExemptAdd",
   ModLogActionAutomodRuleExemptRemove = "commands.modlog.actions.automodRuleExemptRemove",
+  ModLogActionAutomodRuleUpdate = "commands.modlog.actions.automodRuleUpdate",
+  ModLogUnknownModerator = "commands.modlog.unknownModerator",
 
   AutomodRuleGroupName = "commands.automodRule.name",
   AutomodRuleGroupDescription = "commands.automodRule.description",

@@ -18,6 +18,7 @@ import {
   TextChannel,
 } from "discord.js";
 import { TranslationKey } from "@lib/common/translationKey.common";
+import { PendingModActionRegistry } from "@lib/mod-log/pending-mod-action.registry";
 
 type AlertChannel = TextChannel | NewsChannel;
 
@@ -28,13 +29,13 @@ interface CommonRuleOptions {
 
 @Injectable()
 export class AutomodService {
-  private static readonly SELF_CHANGE_TTL_MS = 5000;
-
   private readonly logger = new Logger(AutomodService.name);
-  private readonly recentSelfChanges = new Set<string>();
+
+  constructor(private readonly pendingModActionRegistry: PendingModActionRegistry) {}
 
   public async createKeywordRule(
     guild: Guild,
+    moderatorId: string,
     params: CommonRuleOptions & { name: string; keywords: string[] },
   ): Promise<AutoModerationRule> {
     const rule = await guild.autoModerationRules.create({
@@ -46,12 +47,13 @@ export class AutomodService {
       enabled: true,
     });
     this.logCreated(guild, rule);
-    this.markSelfChange(rule.id);
+    this.pendingModActionRegistry.mark(rule.id, moderatorId);
     return rule;
   }
 
   public async createPresetRule(
     guild: Guild,
+    moderatorId: string,
     params: CommonRuleOptions & { name: string; profanity: boolean; sexualContent: boolean; slurs: boolean },
   ): Promise<AutoModerationRule> {
     const presets: AutoModerationRuleKeywordPresetType[] = [];
@@ -68,12 +70,13 @@ export class AutomodService {
       enabled: true,
     });
     this.logCreated(guild, rule);
-    this.markSelfChange(rule.id);
+    this.pendingModActionRegistry.mark(rule.id, moderatorId);
     return rule;
   }
 
   public async createMentionSpamRule(
     guild: Guild,
+    moderatorId: string,
     params: CommonRuleOptions & { name: string; mentionLimit: number; raidProtection: boolean },
   ): Promise<AutoModerationRule> {
     const rule = await guild.autoModerationRules.create({
@@ -88,12 +91,13 @@ export class AutomodService {
       enabled: true,
     });
     this.logCreated(guild, rule);
-    this.markSelfChange(rule.id);
+    this.pendingModActionRegistry.mark(rule.id, moderatorId);
     return rule;
   }
 
   public async createSpamRule(
     guild: Guild,
+    moderatorId: string,
     params: { name: string; alertChannel?: AlertChannel },
   ): Promise<AutoModerationRule> {
     const rule = await guild.autoModerationRules.create({
@@ -104,12 +108,13 @@ export class AutomodService {
       enabled: true,
     });
     this.logCreated(guild, rule);
-    this.markSelfChange(rule.id);
+    this.pendingModActionRegistry.mark(rule.id, moderatorId);
     return rule;
   }
 
   public async createMemberProfileRule(
     guild: Guild,
+    moderatorId: string,
     params: { name: string; keywords: string[]; alertChannel?: AlertChannel },
   ): Promise<AutoModerationRule> {
     const rule = await guild.autoModerationRules.create({
@@ -121,12 +126,13 @@ export class AutomodService {
       enabled: true,
     });
     this.logCreated(guild, rule);
-    this.markSelfChange(rule.id);
+    this.pendingModActionRegistry.mark(rule.id, moderatorId);
     return rule;
   }
 
   public async addKeywordsToRule(
     guild: Guild,
+    moderatorId: string,
     ruleName: string,
     newKeywords: string[],
   ): Promise<{ rule: AutoModerationRule; addedCount: number } | null> {
@@ -152,12 +158,13 @@ export class AutomodService {
 
     const updatedRule = addedCount > 0 ? await rule.setKeywordFilter(merged) : rule;
     this.logger.log(`Added ${addedCount} keyword(s) to AutoMod rule "${rule.name}" (${rule.id}) in ${guild.name}`);
-    this.markSelfChange(updatedRule.id);
+    this.pendingModActionRegistry.mark(updatedRule.id, moderatorId);
     return { rule: updatedRule, addedCount };
   }
 
   public async removeKeywordsFromRule(
     guild: Guild,
+    moderatorId: string,
     ruleName: string,
     keywordsToRemove: string[],
   ): Promise<{ rule: AutoModerationRule; removedCount: number } | null> {
@@ -176,11 +183,11 @@ export class AutomodService {
 
     const updatedRule = removedCount > 0 ? await rule.setKeywordFilter(remaining) : rule;
     this.logger.log(`Removed ${removedCount} keyword(s) from AutoMod rule "${rule.name}" (${rule.id}) in ${guild.name}`);
-    this.markSelfChange(updatedRule.id);
+    this.pendingModActionRegistry.mark(updatedRule.id, moderatorId);
     return { rule: updatedRule, removedCount };
   }
 
-  public async toggleRule(guild: Guild, ruleName: string): Promise<AutoModerationRule | null> {
+  public async toggleRule(guild: Guild, moderatorId: string, ruleName: string): Promise<AutoModerationRule | null> {
     const rule = await this.findRuleByName(guild, ruleName);
     if (!rule) return null;
 
@@ -188,12 +195,13 @@ export class AutomodService {
     this.logger.log(
       `${updatedRule.enabled ? "Enabled" : "Disabled"} AutoMod rule "${rule.name}" (${rule.id}) in ${guild.name}`,
     );
-    this.markSelfChange(updatedRule.id);
+    this.pendingModActionRegistry.mark(updatedRule.id, moderatorId);
     return updatedRule;
   }
 
   public async addExemption(
     guild: Guild,
+    moderatorId: string,
     ruleName: string,
     exemption: { role?: Role; channel?: GuildBasedChannel },
   ): Promise<AutoModerationRule | null> {
@@ -211,12 +219,13 @@ export class AutomodService {
       exemptChannels: [...exemptChannels.values()],
     });
     this.logger.log(`Updated exemptions for AutoMod rule "${rule.name}" (${rule.id}) in ${guild.name}`);
-    this.markSelfChange(updatedRule.id);
+    this.pendingModActionRegistry.mark(updatedRule.id, moderatorId);
     return updatedRule;
   }
 
   public async removeExemption(
     guild: Guild,
+    moderatorId: string,
     ruleName: string,
     exemption: { role?: Role; channel?: GuildBasedChannel },
   ): Promise<AutoModerationRule | null> {
@@ -234,7 +243,7 @@ export class AutomodService {
       exemptChannels: [...exemptChannels.values()],
     });
     this.logger.log(`Updated exemptions for AutoMod rule "${rule.name}" (${rule.id}) in ${guild.name}`);
-    this.markSelfChange(updatedRule.id);
+    this.pendingModActionRegistry.mark(updatedRule.id, moderatorId);
     return updatedRule;
   }
 
@@ -353,7 +362,7 @@ export class AutomodService {
     return [...rules.values()];
   }
 
-  public async deleteRules(guild: Guild, ruleIds: string[]): Promise<AutoModerationRule[]> {
+  public async deleteRules(guild: Guild, moderatorId: string, ruleIds: string[]): Promise<AutoModerationRule[]> {
     const rules = await this.listRules(guild);
     const rulesToDelete = rules.filter((rule) => ruleIds.includes(rule.id));
 
@@ -361,7 +370,7 @@ export class AutomodService {
       rulesToDelete.map((rule) => guild.autoModerationRules.delete(rule.id)),
     );
     const deletedRules = rulesToDelete.filter((_, i) => results[i].status === "fulfilled");
-    deletedRules.forEach((rule) => this.markSelfChange(rule.id));
+    deletedRules.forEach((rule) => this.pendingModActionRegistry.mark(rule.id, moderatorId));
 
     this.logger.log(`Deleted ${deletedRules.length}/${ruleIds.length} AutoMod rule(s) in ${guild.name}`);
     return deletedRules;
@@ -371,15 +380,6 @@ export class AutomodService {
     this.logger.log(
       `Created AutoMod rule "${rule.name}" (${rule.id}) in ${guild.name} — trigger: ${rule.triggerType}`,
     );
-  }
-
-  public markSelfChange(ruleId: string): void {
-    this.recentSelfChanges.add(ruleId);
-    setTimeout(() => this.recentSelfChanges.delete(ruleId), AutomodService.SELF_CHANGE_TTL_MS);
-  }
-
-  public wasRecentlyChangedBySelf(ruleId: string): boolean {
-    return this.recentSelfChanges.has(ruleId);
   }
 
   public buildRulesListEmbed(rules: AutoModerationRule[], t: TranslationFn): EmbedBuilder {

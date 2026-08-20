@@ -49,7 +49,13 @@ export default {
 		help: {
 			name: 'help',
 			description: 'Xem danh sách các lệnh',
-			title: 'Danh sách lệnh'
+			title: 'Danh sách lệnh',
+			categories: {
+				utility: '🔧 Tiện ích',
+				moderation: '🛡️ Kiểm duyệt',
+				automod: '🤖 Tự động kiểm duyệt',
+				other: '📦 Khác'
+			}
 		},
 		uptime: {
 			name: 'uptime',
@@ -261,7 +267,7 @@ export default {
 		},
 		role: {
 			name: 'role',
-			description: 'Gán hoặc gỡ role của một thành viên',
+			description: 'Quản lý role của server',
 			add: {
 				name: 'add',
 				description: 'Gán role cho một thành viên',
@@ -299,6 +305,59 @@ export default {
 					}
 				},
 				reply: '✅ Đã gỡ {{role}} của {{target}}.'
+			},
+			create: {
+				name: 'create',
+				description: 'Tạo role mới',
+				options: {
+					name: {
+						name: 'name',
+						description: 'Tên role cần tạo'
+					},
+					color: {
+						name: 'color',
+						description: 'Màu role dạng hex, ví dụ #ff0000 (không bắt buộc)'
+					},
+					secondaryColor: {
+						name: 'secondary_color',
+						description: 'Màu thứ 2 để tạo role gradient (cần server đủ boost, không bắt buộc)'
+					},
+					holographic: {
+						name: 'holographic',
+						description: 'Dùng màu cầu vồng (holographic) có sẵn của Discord (cần server đủ boost, không bắt buộc)'
+					},
+					hoisted: {
+						name: 'hoisted',
+						description: 'Hiển thị riêng thành viên có role này trong danh sách (không bắt buộc)'
+					},
+					mentionable: {
+						name: 'mentionable',
+						description: 'Cho phép mention role này (không bắt buộc)'
+					},
+					reason: {
+						name: 'reason',
+						description: 'Lý do tạo role này'
+					}
+				},
+				invalidColorReply: '❌ Mã màu không hợp lệ. Vui lòng dùng định dạng hex, ví dụ #ff0000.',
+				gradientRequiresColorReply: '❌ Cần truyền cả `color` khi dùng `secondary_color` để tạo gradient.',
+				enhancedColorsUnavailableReply: '❌ Server chưa đủ mức Boost để dùng màu gradient/holographic cho role.',
+				reply: '✅ Đã tạo role {{role}}.'
+			},
+			delete: {
+				name: 'delete',
+				description: 'Xóa một role',
+				options: {
+					role: {
+						name: 'role',
+						description: 'Role cần xóa'
+					},
+					reason: {
+						name: 'reason',
+						description: 'Lý do xóa role này'
+					}
+				},
+				reply: '🗑️ Đã xóa role **{{role}}**.'
 			}
 		},
 		lock: {
@@ -375,6 +434,9 @@ export default {
 				mute: 'Mute',
 				roleAdd: 'Gán role',
 				roleRemove: 'Gỡ role',
+				roleCreate: 'Tạo role',
+				roleDelete: 'Xóa role',
+				roleUpdate: 'Cập nhật role',
 				channelLock: 'Khóa channel',
 				channelUnlock: 'Mở khóa channel',
 				automodRuleCreate: 'Tạo rule AutoMod',
@@ -386,7 +448,14 @@ export default {
 				automodRuleExemptRemove: 'Gỡ miễn trừ AutoMod',
 				automodRuleUpdate: 'Cập nhật rule AutoMod'
 			},
-			unknownModerator: 'Không rõ (sửa trực tiếp trên Discord)'
+			unknownModerator: 'Không rõ (sửa trực tiếp trên Discord)',
+			roleUpdate: {
+				name: 'Tên: {{old}} → {{new}}',
+				color: 'Màu: {{old}} → {{new}}',
+				hoisted: 'Hiển thị riêng: {{old}} → {{new}}',
+				mentionable: 'Có thể mention: {{old}} → {{new}}',
+				permissions: 'Quyền hạn đã thay đổi'
+			}
 		},
 		automodRule: {
 			name: 'automod-rule',

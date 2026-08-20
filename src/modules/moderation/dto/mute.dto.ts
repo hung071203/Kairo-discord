@@ -1,6 +1,7 @@
 import { GuildMember } from "discord.js";
 import { localizationMapByKey } from "@necord/localization";
 import { IntegerOption, MemberOption, StringOption } from "necord";
+import { DISCORD_LIMITS } from "@lib/common/discord-limits.common";
 import { TranslationKey } from "@lib/common/translationKey.common";
 
 export class MuteDto {
@@ -18,7 +19,7 @@ export class MuteDto {
     description: "Mute duration in minutes (max 40320, 28 days)",
     required: true,
     min_value: 1,
-    max_value: 40320,
+    max_value: DISCORD_LIMITS.MAX_TIMEOUT_MINUTES,
     name_localizations: localizationMapByKey(TranslationKey.MuteDurationOptionName),
     description_localizations: localizationMapByKey(TranslationKey.MuteDurationOptionDescription),
   })

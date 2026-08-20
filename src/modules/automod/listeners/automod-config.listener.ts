@@ -3,64 +3,68 @@ import { TranslationFn } from "@necord/localization";
 import { ModActionType } from "@prisma/client";
 import { AuditLogEvent, AutoModerationRule, Guild } from "discord.js";
 import { Context, ContextOf, On } from "necord";
+import { AUDIT_LOG_WAIT_MS, UNKNOWN_ACTOR_ID } from "@lib/common/app.common";
 import { fallbackLocale, localizationAdapter } from "@lib/i18n";
 import { TranslationKey } from "@lib/common/translationKey.common";
 import { ModLogService } from "@lib/mod-log/mod-log.service";
-import { AutomodService } from "../services/automod.service";
+import { PendingModActionRegistry } from "@lib/mod-log/pending-mod-action.registry";
 
 interface PendingChange {
   actionType: ModActionType;
   detail?: string;
 }
 
-const AUDIT_LOG_WAIT_MS = 1200;
-const UNKNOWN_EXECUTOR_ID = "unknown";
-
 @Injectable()
 export class AutomodConfigListener {
   private readonly logger = new Logger(AutomodConfigListener.name);
 
   constructor(
-    private readonly automodService: AutomodService,
     private readonly modLogService: ModLogService,
+    private readonly pendingModActionRegistry: PendingModActionRegistry,
   ) {}
 
   @On("autoModerationRuleCreate")
   public async onCreate(@Context() [rule]: ContextOf<"autoModerationRuleCreate">) {
-    if (this.automodService.wasRecentlyChangedBySelf(rule.id)) return;
+    const pending = this.pendingModActionRegistry.consume(rule.id);
+    const moderatorId = pending?.moderatorId ?? rule.creatorId;
 
     const action = await this.modLogService.record({
       guildId: rule.guild.id,
       actionType: ModActionType.AUTOMOD_RULE_CREATE,
       targetId: rule.name,
-      moderatorId: rule.creatorId,
+      moderatorId,
+      reason: pending?.reason,
     });
     await this.modLogService.logToChannel(rule.guild, action, this.translate(rule.guild));
   }
 
   @On("autoModerationRuleDelete")
   public async onDelete(@Context() [rule]: ContextOf<"autoModerationRuleDelete">) {
-    if (this.automodService.wasRecentlyChangedBySelf(rule.id)) return;
+    const pending = this.pendingModActionRegistry.consume(rule.id);
+    const moderatorId =
+      pending?.moderatorId ?? (await this.resolveExecutor(rule.guild, AuditLogEvent.AutoModerationRuleDelete, rule.id));
 
-    const moderatorId = await this.resolveExecutor(rule.guild, AuditLogEvent.AutoModerationRuleDelete, rule.id);
     const action = await this.modLogService.record({
       guildId: rule.guild.id,
       actionType: ModActionType.AUTOMOD_RULE_DELETE,
       targetId: rule.name,
       moderatorId,
+      reason: pending?.reason,
     });
     await this.modLogService.logToChannel(rule.guild, action, this.translate(rule.guild));
   }
 
   @On("autoModerationRuleUpdate")
   public async onUpdate(@Context() [oldRule, newRule]: ContextOf<"autoModerationRuleUpdate">) {
-    if (!oldRule || this.automodService.wasRecentlyChangedBySelf(newRule.id)) return;
+    if (!oldRule) return;
 
     const t = this.translate(newRule.guild);
     const changes = this.diffRule(oldRule, newRule, t);
     if (changes.length === 0) return;
 
-    const moderatorId = await this.resolveExecutor(newRule.guild, AuditLogEvent.AutoModerationRuleUpdate, newRule.id);
+    const pending = this.pendingModActionRegistry.consume(newRule.id);
+    const moderatorId =
+      pending?.moderatorId ?? (await this.resolveExecutor(newRule.guild, AuditLogEvent.AutoModerationRuleUpdate, newRule.id));
 
     for (const change of changes) {
       const action = await this.modLogService.record({
@@ -68,6 +72,7 @@ export class AutomodConfigListener {
         actionType: change.actionType,
         targetId: newRule.name,
         moderatorId,
+        reason: pending?.reason,
         detail: change.detail,
       });
       await this.modLogService.logToChannel(newRule.guild, action, t);
@@ -85,10 +90,10 @@ export class AutomodConfigListener {
     try {
       const logs = await guild.fetchAuditLogs({ type: event, limit: 5 });
       const entry = logs.entries.find((candidate) => candidate.targetId === ruleId);
-      return entry?.executorId ?? UNKNOWN_EXECUTOR_ID;
+      return entry?.executorId ?? UNKNOWN_ACTOR_ID;
     } catch (error) {
       this.logger.warn(`Failed to resolve audit log executor for AutoMod rule ${ruleId}: ${error}`);
-      return UNKNOWN_EXECUTOR_ID;
+      return UNKNOWN_ACTOR_ID;
     }
   }
 

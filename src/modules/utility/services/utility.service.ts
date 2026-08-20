@@ -8,6 +8,7 @@ import {
   Guild,
   GuildBasedChannel,
   GuildMember,
+  Locale,
   MediaChannel,
   NewsChannel,
   Role,
@@ -16,11 +17,47 @@ import {
   User,
   VoiceChannel,
 } from "discord.js";
+import { CommandsService, SlashCommandDiscovery } from "necord";
 import { TranslationKey } from "@lib/common/translationKey.common";
 import { DateUtil } from "@lib/utils/date.util";
 
+const HELP_CATEGORY_BY_ROOT_COMMAND: Record<string, TranslationKey> = {
+  ping: TranslationKey.HelpCategoryUtility,
+  userinfo: TranslationKey.HelpCategoryUtility,
+  serverinfo: TranslationKey.HelpCategoryUtility,
+  avatar: TranslationKey.HelpCategoryUtility,
+  help: TranslationKey.HelpCategoryUtility,
+  uptime: TranslationKey.HelpCategoryUtility,
+  roleinfo: TranslationKey.HelpCategoryUtility,
+  channelinfo: TranslationKey.HelpCategoryUtility,
+  invite: TranslationKey.HelpCategoryUtility,
+
+  kick: TranslationKey.HelpCategoryModeration,
+  ban: TranslationKey.HelpCategoryModeration,
+  unban: TranslationKey.HelpCategoryModeration,
+  mute: TranslationKey.HelpCategoryModeration,
+  purge: TranslationKey.HelpCategoryModeration,
+  slowmode: TranslationKey.HelpCategoryModeration,
+  lock: TranslationKey.HelpCategoryModeration,
+  unlock: TranslationKey.HelpCategoryModeration,
+  warn: TranslationKey.HelpCategoryModeration,
+  role: TranslationKey.HelpCategoryModeration,
+  modlog: TranslationKey.HelpCategoryModeration,
+
+  "automod-rule": TranslationKey.HelpCategoryAutomod,
+};
+
+const HELP_CATEGORY_ORDER: TranslationKey[] = [
+  TranslationKey.HelpCategoryUtility,
+  TranslationKey.HelpCategoryModeration,
+  TranslationKey.HelpCategoryAutomod,
+  TranslationKey.HelpCategoryOther,
+];
+
 @Injectable()
 export class UtilityService {
+  constructor(private readonly commandsService: CommandsService) {}
+
   public getPingLatency(interaction: { createdTimestamp: number }): number {
     return Date.now() - interaction.createdTimestamp;
   }
@@ -97,28 +134,52 @@ export class UtilityService {
       .setImage(avatarUrl);
   }
 
-  public buildHelpEmbed(t: TranslationFn): EmbedBuilder {
-    const commands: { nameKey: TranslationKey; descriptionKey: TranslationKey }[] = [
-      { nameKey: TranslationKey.PingCommandName, descriptionKey: TranslationKey.PingCommandDescription },
-      { nameKey: TranslationKey.UserInfoCommandName, descriptionKey: TranslationKey.UserInfoCommandDescription },
-      { nameKey: TranslationKey.ServerInfoCommandName, descriptionKey: TranslationKey.ServerInfoCommandDescription },
-      { nameKey: TranslationKey.AvatarCommandName, descriptionKey: TranslationKey.AvatarCommandDescription },
-      { nameKey: TranslationKey.UptimeCommandName, descriptionKey: TranslationKey.UptimeCommandDescription },
-      { nameKey: TranslationKey.RoleInfoCommandName, descriptionKey: TranslationKey.RoleInfoCommandDescription },
-      { nameKey: TranslationKey.ChannelInfoCommandName, descriptionKey: TranslationKey.ChannelInfoCommandDescription },
-      { nameKey: TranslationKey.InviteCommandName, descriptionKey: TranslationKey.InviteCommandDescription },
-      { nameKey: TranslationKey.HelpCommandName, descriptionKey: TranslationKey.HelpCommandDescription },
-    ];
+  public buildHelpEmbed(locale: Locale, t: TranslationFn): EmbedBuilder {
+    const linesByCategory = new Map<TranslationKey, string[]>();
 
-    return new EmbedBuilder()
-      .setColor(null)
-      .setTitle(t(TranslationKey.HelpTitle))
-      .addFields(
-        commands.map(({ nameKey, descriptionKey }) => ({
-          name: `/${t(nameKey)}`,
-          value: t(descriptionKey),
-        })),
-      );
+    for (const command of this.commandsService.getCommands()) {
+      if (!command.isSlashCommand()) {
+        continue;
+      }
+
+      const category = HELP_CATEGORY_BY_ROOT_COMMAND[command.getName()] ?? TranslationKey.HelpCategoryOther;
+      const lines = linesByCategory.get(category) ?? [];
+      lines.push(...this.collectCommandLines(command, [], locale));
+      linesByCategory.set(category, lines);
+    }
+
+    const embed = new EmbedBuilder().setColor(null).setTitle(t(TranslationKey.HelpTitle));
+
+    for (const category of HELP_CATEGORY_ORDER) {
+      const lines = linesByCategory.get(category);
+      if (lines?.length) {
+        embed.addFields({ name: t(category), value: lines.join("\n") });
+      }
+    }
+
+    return embed;
+  }
+
+  private collectCommandLines(command: SlashCommandDiscovery, parentPath: string[], locale: Locale): string[] {
+    const path = [...parentPath, command.getName()];
+    const subcommands = [...command.getSubcommands().values()];
+
+    if (subcommands.length === 0) {
+      return [this.formatCommandLine(path, command, locale)];
+    }
+
+    const isFlatGroup = subcommands.every((subcommand) => subcommand.getSubcommands().size === 0);
+    if (isFlatGroup) {
+      const alternatives = subcommands.map((subcommand) => subcommand.getName()).join("|");
+      return [this.formatCommandLine([...path, `<${alternatives}>`], command, locale)];
+    }
+
+    return subcommands.flatMap((subcommand) => this.collectCommandLines(subcommand, path, locale));
+  }
+
+  private formatCommandLine(path: string[], command: SlashCommandDiscovery, locale: Locale): string {
+    const description = command.toJSON().descriptionLocalizations?.[locale] ?? command.getDescription();
+    return `\`/${path.join(" ")}\` — ${description}`;
   }
 
   public buildUptimeEmbed(client: Client, t: TranslationFn): EmbedBuilder {

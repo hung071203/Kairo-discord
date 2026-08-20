@@ -4,10 +4,9 @@ import { ModAction, ModActionType } from "@prisma/client";
 import { EmbedBuilder, Guild } from "discord.js";
 import { PrismaService } from "@lib/database/prisma.service";
 import { PaginatorPage } from "@lib/pagination/paginator.service";
+import { UNKNOWN_ACTOR_ID } from "@lib/common/app.common";
 import { TranslationKey } from "@lib/common/translationKey.common";
 import { DateUtil } from "@lib/utils/date.util";
-
-const UNKNOWN_MODERATOR_ID = "unknown";
 
 interface RecordModActionParams {
   guildId: string;
@@ -21,6 +20,7 @@ interface RecordModActionParams {
 enum TargetFormat {
   User,
   Channel,
+  Role,
   Text,
 }
 
@@ -31,6 +31,9 @@ const TARGET_FORMAT_BY_ACTION: Record<ModActionType, TargetFormat> = {
   [ModActionType.MUTE]: TargetFormat.User,
   [ModActionType.ROLE_ADD]: TargetFormat.User,
   [ModActionType.ROLE_REMOVE]: TargetFormat.User,
+  [ModActionType.ROLE_CREATE]: TargetFormat.Role,
+  [ModActionType.ROLE_DELETE]: TargetFormat.Role,
+  [ModActionType.ROLE_UPDATE]: TargetFormat.Role,
   [ModActionType.CHANNEL_LOCK]: TargetFormat.Channel,
   [ModActionType.CHANNEL_UNLOCK]: TargetFormat.Channel,
   [ModActionType.AUTOMOD_RULE_CREATE]: TargetFormat.Text,
@@ -50,6 +53,9 @@ const ACTION_LABEL_KEYS: Record<ModActionType, TranslationKey> = {
   [ModActionType.MUTE]: TranslationKey.ModLogActionMute,
   [ModActionType.ROLE_ADD]: TranslationKey.ModLogActionRoleAdd,
   [ModActionType.ROLE_REMOVE]: TranslationKey.ModLogActionRoleRemove,
+  [ModActionType.ROLE_CREATE]: TranslationKey.ModLogActionRoleCreate,
+  [ModActionType.ROLE_DELETE]: TranslationKey.ModLogActionRoleDelete,
+  [ModActionType.ROLE_UPDATE]: TranslationKey.ModLogActionRoleUpdate,
   [ModActionType.CHANNEL_LOCK]: TranslationKey.ModLogActionChannelLock,
   [ModActionType.CHANNEL_UNLOCK]: TranslationKey.ModLogActionChannelUnlock,
   [ModActionType.AUTOMOD_RULE_CREATE]: TranslationKey.ModLogActionAutomodRuleCreate,
@@ -162,13 +168,15 @@ export class ModLogService {
   }
 
   private formatModerator(moderatorId: string, t: TranslationFn): string {
-    return moderatorId === UNKNOWN_MODERATOR_ID ? t(TranslationKey.ModLogUnknownModerator) : `<@${moderatorId}>`;
+    return moderatorId === UNKNOWN_ACTOR_ID ? t(TranslationKey.ModLogUnknownModerator) : `<@${moderatorId}>`;
   }
 
   private formatTarget(action: ModAction): string {
     switch (TARGET_FORMAT_BY_ACTION[action.actionType]) {
       case TargetFormat.Channel:
         return `<#${action.targetId}>`;
+      case TargetFormat.Role:
+        return `<@&${action.targetId}>`;
       case TargetFormat.Text:
         return `\`${action.targetId}\``;
       default:

@@ -115,7 +115,7 @@ export class UtilityCommands {
     @Context() [interaction]: SlashCommandContext,
     @CurrentTranslate() t: TranslationFn,
   ) {
-    const embed = this.utilityService.buildHelpEmbed(t);
+    const embed = this.utilityService.buildHelpEmbed(interaction.locale, t);
     return interaction.reply({ embeds: [embed] });
   }
 

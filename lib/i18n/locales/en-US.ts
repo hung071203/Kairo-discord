@@ -49,7 +49,13 @@ export default {
 		help: {
 			name: 'help',
 			description: 'List all available commands',
-			title: 'Available commands'
+			title: 'Available commands',
+			categories: {
+				utility: '🔧 Utility',
+				moderation: '🛡️ Moderation',
+				automod: '🤖 AutoMod',
+				other: '📦 Other'
+			}
 		},
 		uptime: {
 			name: 'uptime',
@@ -261,7 +267,7 @@ export default {
 		},
 		role: {
 			name: 'role',
-			description: 'Add or remove roles from a member',
+			description: 'Manage server roles',
 			add: {
 				name: 'add',
 				description: 'Give a role to a member',
@@ -299,6 +305,59 @@ export default {
 					}
 				},
 				reply: '✅ Removed {{role}} from {{target}}.'
+			},
+			create: {
+				name: 'create',
+				description: 'Create a new role',
+				options: {
+					name: {
+						name: 'name',
+						description: 'Name for the new role'
+					},
+					color: {
+						name: 'color',
+						description: 'Hex color for the role, e.g. #ff0000 (optional)'
+					},
+					secondaryColor: {
+						name: 'secondary_color',
+						description: 'Second hex color to make this a gradient role (requires server boost, optional)'
+					},
+					holographic: {
+						name: 'holographic',
+						description: "Use Discord's holographic (rainbow) role color (requires server boost, optional)"
+					},
+					hoisted: {
+						name: 'hoisted',
+						description: 'Display members with this role separately in the member list (optional)'
+					},
+					mentionable: {
+						name: 'mentionable',
+						description: 'Allow anyone to mention this role (optional)'
+					},
+					reason: {
+						name: 'reason',
+						description: 'The reason for creating this role'
+					}
+				},
+				invalidColorReply: '❌ Invalid color. Please use hex format, e.g. #ff0000.',
+				gradientRequiresColorReply: '❌ You must also provide `color` when using `secondary_color` for a gradient.',
+				enhancedColorsUnavailableReply: "❌ This server doesn't have enough Boost level to use gradient/holographic role colors.",
+				reply: '✅ Created role {{role}}.'
+			},
+			delete: {
+				name: 'delete',
+				description: 'Delete a role',
+				options: {
+					role: {
+						name: 'role',
+						description: 'The role to delete'
+					},
+					reason: {
+						name: 'reason',
+						description: 'The reason for deleting this role'
+					}
+				},
+				reply: '🗑️ Deleted role **{{role}}**.'
 			}
 		},
 		lock: {
@@ -375,6 +434,9 @@ export default {
 				mute: 'Mute',
 				roleAdd: 'Role added',
 				roleRemove: 'Role removed',
+				roleCreate: 'Role created',
+				roleDelete: 'Role deleted',
+				roleUpdate: 'Role updated',
 				channelLock: 'Channel locked',
 				channelUnlock: 'Channel unlocked',
 				automodRuleCreate: 'AutoMod rule created',
@@ -386,7 +448,14 @@ export default {
 				automodRuleExemptRemove: 'AutoMod exemption removed',
 				automodRuleUpdate: 'AutoMod rule updated'
 			},
-			unknownModerator: 'Unknown (changed directly in Discord)'
+			unknownModerator: 'Unknown (changed directly in Discord)',
+			roleUpdate: {
+				name: 'Name: {{old}} → {{new}}',
+				color: 'Color: {{old}} → {{new}}',
+				hoisted: 'Hoisted: {{old}} → {{new}}',
+				mentionable: 'Mentionable: {{old}} → {{new}}',
+				permissions: 'Permissions changed'
+			}
 		},
 		automodRule: {
 			name: 'automod-rule',

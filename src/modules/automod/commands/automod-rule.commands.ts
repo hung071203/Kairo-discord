@@ -1,6 +1,5 @@
 import { Injectable } from "@nestjs/common";
 import { CurrentTranslate, localizationMapByKey, TranslationFn } from "@necord/localization";
-import { ModActionType } from "@prisma/client";
 import { EmbedBuilder, MessageFlags, PermissionFlagsBits } from "discord.js";
 import {
   Context,
@@ -14,7 +13,6 @@ import {
 } from "necord";
 import { fallbackLocale, localizationAdapter } from "@lib/i18n";
 import { TranslationKey } from "@lib/common/translationKey.common";
-import { ModLogService } from "@lib/mod-log/mod-log.service";
 import { AutomodAddKeywordDto } from "../dto/automod-add-keyword.dto";
 import { AutomodExemptAddDto } from "../dto/automod-exempt-add.dto";
 import { AutomodExemptRemoveDto } from "../dto/automod-exempt-remove.dto";
@@ -35,10 +33,7 @@ export const AutomodRuleGroup = createCommandGroupDecorator({
 @Injectable()
 @AutomodRuleGroup()
 export class AutomodRuleCommands {
-  constructor(
-    private readonly automodService: AutomodService,
-    private readonly modLogService: ModLogService,
-  ) {}
+  constructor(private readonly automodService: AutomodService) {}
 
   @Subcommand({
     name: "list",
@@ -90,7 +85,7 @@ export class AutomodRuleCommands {
     @CurrentTranslate() t: TranslationFn,
   ) {
     const newKeywords = this.splitKeywords(keywords);
-    const result = await this.automodService.addKeywordsToRule(interaction.guild!, ruleName, newKeywords);
+    const result = await this.automodService.addKeywordsToRule(interaction.guild!, interaction.user.id, ruleName, newKeywords);
 
     if (!result) {
       return interaction.reply({
@@ -98,15 +93,6 @@ export class AutomodRuleCommands {
         flags: MessageFlags.Ephemeral,
       });
     }
-
-    const action = await this.modLogService.record({
-      guildId: interaction.guildId!,
-      actionType: ModActionType.AUTOMOD_RULE_KEYWORD_ADD,
-      targetId: result.rule.name,
-      moderatorId: interaction.user.id,
-      detail: newKeywords.join(", "),
-    });
-    await this.modLogService.logToChannel(interaction.guild!, action, t);
 
     return interaction.reply(
       t(TranslationKey.AutomodAddKeywordReply, { count: String(result.addedCount), name: result.rule.name }),
@@ -125,7 +111,12 @@ export class AutomodRuleCommands {
     @CurrentTranslate() t: TranslationFn,
   ) {
     const keywordsToRemove = this.splitKeywords(keywords);
-    const result = await this.automodService.removeKeywordsFromRule(interaction.guild!, ruleName, keywordsToRemove);
+    const result = await this.automodService.removeKeywordsFromRule(
+      interaction.guild!,
+      interaction.user.id,
+      ruleName,
+      keywordsToRemove,
+    );
 
     if (!result) {
       return interaction.reply({
@@ -133,15 +124,6 @@ export class AutomodRuleCommands {
         flags: MessageFlags.Ephemeral,
       });
     }
-
-    const action = await this.modLogService.record({
-      guildId: interaction.guildId!,
-      actionType: ModActionType.AUTOMOD_RULE_KEYWORD_REMOVE,
-      targetId: result.rule.name,
-      moderatorId: interaction.user.id,
-      detail: keywordsToRemove.join(", "),
-    });
-    await this.modLogService.logToChannel(interaction.guild!, action, t);
 
     return interaction.reply(
       t(TranslationKey.AutomodRemoveKeywordReply, { count: String(result.removedCount), name: result.rule.name }),
@@ -159,7 +141,7 @@ export class AutomodRuleCommands {
     @Options() { ruleName }: AutomodToggleDto,
     @CurrentTranslate() t: TranslationFn,
   ) {
-    const rule = await this.automodService.toggleRule(interaction.guild!, ruleName);
+    const rule = await this.automodService.toggleRule(interaction.guild!, interaction.user.id, ruleName);
 
     if (!rule) {
       return interaction.reply({
@@ -167,15 +149,6 @@ export class AutomodRuleCommands {
         flags: MessageFlags.Ephemeral,
       });
     }
-
-    const action = await this.modLogService.record({
-      guildId: interaction.guildId!,
-      actionType: ModActionType.AUTOMOD_RULE_TOGGLE,
-      targetId: rule.name,
-      moderatorId: interaction.user.id,
-      detail: rule.enabled ? t(TranslationKey.AutomodStatusEnabled) : t(TranslationKey.AutomodStatusDisabled),
-    });
-    await this.modLogService.logToChannel(interaction.guild!, action, t);
 
     return interaction.reply(
       t(rule.enabled ? TranslationKey.AutomodToggleEnabledReply : TranslationKey.AutomodToggleDisabledReply, {
@@ -202,7 +175,10 @@ export class AutomodRuleCommands {
       });
     }
 
-    const rule = await this.automodService.addExemption(interaction.guild!, ruleName, { role, channel });
+    const rule = await this.automodService.addExemption(interaction.guild!, interaction.user.id, ruleName, {
+      role,
+      channel,
+    });
 
     if (!rule) {
       return interaction.reply({
@@ -212,15 +188,6 @@ export class AutomodRuleCommands {
     }
 
     const target = [role?.toString(), channel?.toString()].filter(Boolean).join(", ");
-
-    const action = await this.modLogService.record({
-      guildId: interaction.guildId!,
-      actionType: ModActionType.AUTOMOD_RULE_EXEMPT_ADD,
-      targetId: rule.name,
-      moderatorId: interaction.user.id,
-      detail: target,
-    });
-    await this.modLogService.logToChannel(interaction.guild!, action, t);
 
     return interaction.reply(t(TranslationKey.AutomodExemptAddReply, { target, name: rule.name }));
   }
@@ -243,7 +210,10 @@ export class AutomodRuleCommands {
       });
     }
 
-    const rule = await this.automodService.removeExemption(interaction.guild!, ruleName, { role, channel });
+    const rule = await this.automodService.removeExemption(interaction.guild!, interaction.user.id, ruleName, {
+      role,
+      channel,
+    });
 
     if (!rule) {
       return interaction.reply({
@@ -253,15 +223,6 @@ export class AutomodRuleCommands {
     }
 
     const target = [role?.toString(), channel?.toString()].filter(Boolean).join(", ");
-
-    const action = await this.modLogService.record({
-      guildId: interaction.guildId!,
-      actionType: ModActionType.AUTOMOD_RULE_EXEMPT_REMOVE,
-      targetId: rule.name,
-      moderatorId: interaction.user.id,
-      detail: target,
-    });
-    await this.modLogService.logToChannel(interaction.guild!, action, t);
 
     return interaction.reply(t(TranslationKey.AutomodExemptRemoveReply, { target, name: rule.name }));
   }
@@ -305,17 +266,7 @@ export class AutomodRuleCommands {
       });
     }
 
-    const deletedRules = await this.automodService.deleteRules(interaction.guild!, ruleIds);
-
-    for (const rule of deletedRules) {
-      const action = await this.modLogService.record({
-        guildId: interaction.guildId!,
-        actionType: ModActionType.AUTOMOD_RULE_DELETE,
-        targetId: rule.name,
-        moderatorId: interaction.user.id,
-      });
-      await this.modLogService.logToChannel(interaction.guild!, action, t);
-    }
+    const deletedRules = await this.automodService.deleteRules(interaction.guild!, interaction.user.id, ruleIds);
 
     return interaction.reply({
       content: t(TranslationKey.AutomodRuleDeleteReply, { count: String(deletedRules.length) }),

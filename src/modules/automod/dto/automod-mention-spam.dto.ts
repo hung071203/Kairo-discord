@@ -1,6 +1,7 @@
 import { ChannelType, NewsChannel, TextChannel } from "discord.js";
 import { localizationMapByKey } from "@necord/localization";
 import { BooleanOption, ChannelOption, IntegerOption, StringOption } from "necord";
+import { DISCORD_LIMITS } from "@lib/common/discord-limits.common";
 import { TranslationKey } from "@lib/common/translationKey.common";
 
 export class AutomodMentionSpamDto {
@@ -18,7 +19,7 @@ export class AutomodMentionSpamDto {
     description: "Max mentions allowed per message (1-50)",
     required: true,
     min_value: 1,
-    max_value: 50,
+    max_value: DISCORD_LIMITS.MAX_MENTION_LIMIT,
     name_localizations: localizationMapByKey(TranslationKey.AutomodMentionLimitOptionName),
     description_localizations: localizationMapByKey(TranslationKey.AutomodMentionLimitOptionDescription),
   })
@@ -48,7 +49,7 @@ export class AutomodMentionSpamDto {
     description: "Timeout the member for this many minutes when triggered (optional)",
     required: false,
     min_value: 1,
-    max_value: 40320,
+    max_value: DISCORD_LIMITS.MAX_TIMEOUT_MINUTES,
     name_localizations: localizationMapByKey(TranslationKey.AutomodTimeoutMinutesOptionName),
     description_localizations: localizationMapByKey(TranslationKey.AutomodTimeoutMinutesOptionDescription),
   })
